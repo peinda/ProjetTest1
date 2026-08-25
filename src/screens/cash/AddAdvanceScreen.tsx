@@ -6,6 +6,7 @@ import { AdvanceTarget } from '../../db/types';
 import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
+import { parseAmount, MAX_LENGTHS } from '../../utils/validation';
 
 export default function AddAdvanceScreen() {
   const navigation = useNavigation();
@@ -15,8 +16,8 @@ export default function AddAdvanceScreen() {
   const [saving, setSaving] = useState(false);
 
   const onSave = async () => {
-    const amountNum = parseFloat(amount);
-    if (!amountNum || amountNum <= 0) {
+    const amountNum = parseAmount(amount);
+    if (amountNum === null) {
       Alert.alert('Montant invalide', 'Saisissez un montant supérieur à 0.');
       return;
     }
@@ -58,6 +59,7 @@ export default function AddAdvanceScreen() {
         value={note}
         onChangeText={setNote}
         placeholder="Ex: Crédit pour un client"
+        maxLength={MAX_LENGTHS.note}
       />
 
       <Text style={styles.hint}>

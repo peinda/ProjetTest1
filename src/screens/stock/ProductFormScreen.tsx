@@ -7,6 +7,7 @@ import { createProduct, getProduct, updateProduct, addStock, deleteProduct } fro
 import { colors, spacing, fontSize } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
+import { parseAmount, parseQuantity, isNonEmpty, MAX_LENGTHS } from '../../utils/validation';
 
 type Nav = NativeStackNavigationProp<StockStackParamList, 'ProductForm'>;
 type R = RouteProp<StockStackParamList, 'ProductForm'>;
@@ -42,8 +43,28 @@ export default function ProductFormScreen() {
   }, [productId]);
 
   const onSave = async () => {
-    if (!name.trim()) {
+    if (!isNonEmpty(name)) {
       Alert.alert('Nom requis', 'Veuillez saisir le nom du produit.');
+      return;
+    }
+    const purchase = parseAmount(purchasePrice || '0', { allowZero: true });
+    if (purchase === null) {
+      Alert.alert('Prix d\'achat invalide', 'Saisissez un montant valide (0 ou plus).');
+      return;
+    }
+    const sale = parseAmount(salePrice || '0', { allowZero: true });
+    if (sale === null) {
+      Alert.alert('Prix de vente invalide', 'Saisissez un montant valide (0 ou plus).');
+      return;
+    }
+    const qty = isEdit ? 0 : parseQuantity(quantity || '0', { allowZero: true });
+    if (qty === null) {
+      Alert.alert('Quantité invalide', 'Saisissez un nombre entier valide (0 ou plus).');
+      return;
+    }
+    const threshNum = parseQuantity(threshold || '0', { allowZero: true });
+    if (threshNum === null) {
+      Alert.alert('Seuil invalide', 'Saisissez un nombre entier valide (0 ou plus).');
       return;
     }
     setSaving(true);
@@ -51,10 +72,10 @@ export default function ProductFormScreen() {
       const payload = {
         name: name.trim(),
         category: category.trim() || null,
-        purchase_price: parseFloat(purchasePrice) || 0,
-        sale_price: parseFloat(salePrice) || 0,
-        quantity: parseInt(quantity, 10) || 0,
-        low_stock_threshold: parseInt(threshold, 10) || 3,
+        purchase_price: purchase,
+        sale_price: sale,
+        quantity: qty,
+        low_stock_threshold: threshNum,
       };
       if (isEdit && productId) {
         await updateProduct(productId, payload);
@@ -68,8 +89,12 @@ export default function ProductFormScreen() {
   };
 
   const onRestock = async () => {
-    const amount = parseInt(restockAmount, 10);
-    if (!productId || !amount) return;
+    if (!productId) return;
+    const amount = parseQuantity(restockAmount);
+    if (amount === null) {
+      Alert.alert('Quantité invalide', 'Saisissez un nombre entier supérieur à 0.');
+      return;
+    }
     await addStock(productId, amount, 'Réapprovisionnement');
     setRestockAmount('');
     const p = await getProduct(productId);
@@ -94,8 +119,20 @@ export default function ProductFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
-      <Field label="Nom du produit" value={name} onChangeText={setName} placeholder="Ex: Robe wax" />
-      <Field label="Catégorie (optionnel)" value={category} onChangeText={setCategory} placeholder="Ex: Robes" />
+      <Field
+        label="Nom du produit"
+        value={name}
+        onChangeText={setName}
+        placeholder="Ex: Robe wax"
+        maxLength={MAX_LENGTHS.name}
+      />
+      <Field
+        label="Catégorie (optionnel)"
+        value={category}
+        onChangeText={setCategory}
+        placeholder="Ex: Robes"
+        maxLength={MAX_LENGTHS.category}
+      />
       <Field
         label="Prix d'achat (FCFA)"
         value={purchasePrice}

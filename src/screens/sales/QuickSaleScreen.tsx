@@ -9,6 +9,7 @@ import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA, PAYMENT_LABELS } from '../../utils/format';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
+import { parseAmount, parseQuantity } from '../../utils/validation';
 
 const METHODS: PaymentMethod[] = ['especes', 'wave', 'om'];
 const METHOD_COLORS: Record<PaymentMethod, string> = {
@@ -37,10 +38,17 @@ export default function QuickSaleScreen() {
     setQuantity('1');
   };
 
-  const qtyNum = parseInt(quantity, 10) || 0;
-  const priceNum = parseFloat(unitPrice) || 0;
+  const validQty = parseQuantity(quantity);
+  const validPrice = parseAmount(unitPrice, { allowZero: true });
+  const qtyNum = validQty ?? 0;
+  const priceNum = validPrice ?? 0;
   const total = qtyNum * priceNum;
-  const canSave = !!selected && qtyNum > 0 && priceNum >= 0 && !!payment && qtyNum <= (selected?.quantity ?? 0);
+  const canSave =
+    !!selected &&
+    validQty !== null &&
+    validPrice !== null &&
+    !!payment &&
+    validQty <= (selected?.quantity ?? 0);
 
   const reset = () => {
     setSelected(null);
@@ -51,7 +59,17 @@ export default function QuickSaleScreen() {
 
   const onConfirm = async () => {
     if (!selected || !payment) return;
-    if (qtyNum > selected.quantity) {
+    const qty = parseQuantity(quantity);
+    if (qty === null) {
+      Alert.alert('Quantité invalide', 'Saisissez un nombre entier supérieur à 0.');
+      return;
+    }
+    const price = parseAmount(unitPrice, { allowZero: true });
+    if (price === null) {
+      Alert.alert('Prix invalide', 'Saisissez un montant valide (0 ou plus).');
+      return;
+    }
+    if (qty > selected.quantity) {
       Alert.alert('Stock insuffisant', `Il ne reste que ${selected.quantity} en stock.`);
       return;
     }
@@ -60,8 +78,8 @@ export default function QuickSaleScreen() {
       await createSale({
         product_id: selected.id,
         product_name: selected.name,
-        quantity: qtyNum,
-        unit_price: priceNum,
+        quantity: qty,
+        unit_price: price,
         payment_method: payment,
       });
       const updated = await listProducts();

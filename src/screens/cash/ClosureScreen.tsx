@@ -10,6 +10,7 @@ import Field from '../../components/Field';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import { exportClosureToPdf } from '../../utils/pdf';
+import { parseAmount, MAX_LENGTHS } from '../../utils/validation';
 
 type R = RouteProp<CashStackParamList, 'Closure'>;
 
@@ -52,10 +53,23 @@ export default function ClosureScreen() {
   const diffWave = cWave - sheet.theoretical_wave;
   const diffOm = cOm - sheet.theoretical_om;
 
+  function validateCounted(): { commerce: number; wave: number; om: number } | null {
+    const commerce = parseAmount(countedCommerce, { allowZero: true });
+    const wave = parseAmount(countedWave, { allowZero: true });
+    const om = parseAmount(countedOm, { allowZero: true });
+    if (commerce === null || wave === null || om === null) {
+      Alert.alert('Montant invalide', 'Les montants comptés doivent être des nombres valides (0 ou plus).');
+      return null;
+    }
+    return { commerce, wave, om };
+  }
+
   const onSave = async () => {
+    const counted = validateCounted();
+    if (!counted) return;
     setSaving(true);
     try {
-      await saveClosure(sheet, { commerce: cCommerce, wave: cWave, om: cOm }, note.trim() || undefined);
+      await saveClosure(sheet, counted, note.trim() || undefined);
       Alert.alert('Clôture enregistrée', 'La journée a été clôturée avec succès.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
@@ -65,7 +79,9 @@ export default function ClosureScreen() {
   };
 
   const onExportPdf = async () => {
-    await exportClosureToPdf(sheet, { commerce: cCommerce, wave: cWave, om: cOm }, note.trim() || undefined);
+    const counted = validateCounted();
+    if (!counted) return;
+    await exportClosureToPdf(sheet, counted, note.trim() || undefined);
   };
 
   return (
@@ -91,7 +107,13 @@ export default function ClosureScreen() {
         <DiffRow label="Orange Money" value={diffOm} />
       </Card>
 
-      <Field label="Note (optionnel)" value={note} onChangeText={setNote} placeholder="Remarque sur la journée" />
+      <Field
+        label="Note (optionnel)"
+        value={note}
+        onChangeText={setNote}
+        placeholder="Remarque sur la journée"
+        maxLength={MAX_LENGTHS.note}
+      />
 
       <Button label={saving ? 'Enregistrement...' : 'Valider la clôture'} onPress={onSave} disabled={saving} />
       <View style={{ height: spacing.sm }} />

@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { initDatabase } from './src/db/database';
+import { seedSampleDataIfEmpty } from './src/db/seed';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LockScreen from './src/screens/LockScreen';
 import RootNavigator from './src/navigation/RootNavigator';
@@ -34,7 +35,9 @@ export default function App() {
   const [dbReady, setDbReady] = useState(false);
 
   useEffect(() => {
-    initDatabase().then(() => setDbReady(true));
+    initDatabase()
+      .then(() => (__DEV__ ? seedSampleDataIfEmpty() : undefined))
+      .then(() => setDbReady(true));
   }, []);
 
   if (!dbReady) {

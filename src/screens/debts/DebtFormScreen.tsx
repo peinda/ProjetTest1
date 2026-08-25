@@ -5,6 +5,7 @@ import { createDebt } from '../../db/debts';
 import { colors, spacing } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
+import { parseAmount, isNonEmpty, isValidPhone, MAX_LENGTHS } from '../../utils/validation';
 
 export default function DebtFormScreen() {
   const navigation = useNavigation();
@@ -16,12 +17,16 @@ export default function DebtFormScreen() {
   const [saving, setSaving] = useState(false);
 
   const onSave = async () => {
-    if (!clientName.trim()) {
+    if (!isNonEmpty(clientName)) {
       Alert.alert('Nom requis', 'Veuillez saisir le nom du client.');
       return;
     }
-    const amountNum = parseFloat(amount);
-    if (!amountNum || amountNum <= 0) {
+    if (!isValidPhone(phone)) {
+      Alert.alert('Téléphone invalide', 'Saisissez un numéro valide ou laissez le champ vide.');
+      return;
+    }
+    const amountNum = parseAmount(amount);
+    if (amountNum === null) {
       Alert.alert('Montant invalide', 'Saisissez un montant supérieur à 0.');
       return;
     }
@@ -42,13 +47,20 @@ export default function DebtFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
-      <Field label="Nom du client" value={clientName} onChangeText={setClientName} placeholder="Ex: Fatou Diop" />
+      <Field
+        label="Nom du client"
+        value={clientName}
+        onChangeText={setClientName}
+        placeholder="Ex: Fatou Diop"
+        maxLength={MAX_LENGTHS.name}
+      />
       <Field
         label="Téléphone (optionnel)"
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
         placeholder="Ex: 77 000 00 00"
+        maxLength={MAX_LENGTHS.phone}
       />
       <Field
         label="Montant dû (FCFA)"
@@ -57,8 +69,13 @@ export default function DebtFormScreen() {
         keyboardType="numeric"
         placeholder="0"
       />
-      <Field label="Produit concerné (optionnel)" value={product} onChangeText={setProduct} />
-      <Field label="Note (optionnel)" value={note} onChangeText={setNote} />
+      <Field
+        label="Produit concerné (optionnel)"
+        value={product}
+        onChangeText={setProduct}
+        maxLength={MAX_LENGTHS.name}
+      />
+      <Field label="Note (optionnel)" value={note} onChangeText={setNote} maxLength={MAX_LENGTHS.note} />
       <Button label={saving ? 'Enregistrement...' : 'Enregistrer la dette'} onPress={onSave} disabled={saving} />
     </ScrollView>
   );

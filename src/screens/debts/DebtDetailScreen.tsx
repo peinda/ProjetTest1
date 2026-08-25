@@ -10,6 +10,7 @@ import { formatDateFr, formatDateTimeFr } from '../../utils/date';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import Field from '../../components/Field';
+import { parseAmount } from '../../utils/validation';
 
 type R = RouteProp<DebtsStackParamList, 'DebtDetail'>;
 
@@ -37,8 +38,8 @@ export default function DebtDetailScreen() {
   if (!debt) return null;
 
   const onPay = async (full: boolean) => {
-    const amount = full ? debt.remaining_amount : parseFloat(paymentAmount);
-    if (!amount || amount <= 0) {
+    const amount = full ? debt.remaining_amount : parseAmount(paymentAmount);
+    if (amount === null) {
       Alert.alert('Montant invalide', 'Saisissez un montant supérieur à 0.');
       return;
     }
