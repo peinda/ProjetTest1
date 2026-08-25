@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { colors, spacing, fontSize, radius } from '../theme/theme';
+
+const logo = require('../../assets/splash-icon.png');
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'];
 
@@ -66,7 +68,7 @@ export default function LockScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.brand}>Baba Robe & Diverss</Text>
+      <Image source={logo} style={styles.logo} resizeMode="contain" />
       <Text style={styles.title}>{title}</Text>
       <View style={styles.dots}>
         {[0, 1, 2, 3].map((i) => (
@@ -106,11 +108,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.lg,
   },
-  brand: {
-    color: '#FFFFFF',
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    marginBottom: spacing.xl,
+  logo: {
+    width: 220,
+    height: 220,
+    borderRadius: radius.lg,
+    marginBottom: spacing.lg,
   },
   title: {
     color: '#FFFFFF',
