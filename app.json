@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Baba Robe & Diverss",
+    "slug": "ProjetTest1",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.babarobe.gestionboutique",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Utilisé pour déverrouiller l'application et protéger vos données financières."
+      }
+    },
+    "android": {
+      "package": "com.babarobe.gestionboutique",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Utilisé pour déverrouiller l'application et protéger vos données financières."
+        }
+      ]
+    ]
+  }
+}

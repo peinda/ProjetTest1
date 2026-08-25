@@ -1,0 +1,99 @@
+import { getDb } from './database';
+import { Product, StockEntry } from './types';
+
+export interface NewProduct {
+  name: string;
+  category?: string | null;
+  purchase_price: number;
+  sale_price: number;
+  quantity: number;
+  low_stock_threshold?: number;
+}
+
+export async function listProducts(): Promise<Product[]> {
+  const db = await getDb();
+  return db.getAllAsync<Product>('SELECT * FROM products ORDER BY name ASC');
+}
+
+export async function getProduct(id: number): Promise<Product | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<Product>('SELECT * FROM products WHERE id = ?', id);
+  return row ?? null;
+}
+
+export async function createProduct(input: NewProduct): Promise<number> {
+  const db = await getDb();
+  const result = await db.runAsync(
+    `INSERT INTO products (name, category, purchase_price, sale_price, quantity, low_stock_threshold)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    input.name,
+    input.category ?? null,
+    input.purchase_price,
+    input.sale_price,
+    input.quantity,
+    input.low_stock_threshold ?? 3
+  );
+  if (input.quantity > 0) {
+    await db.runAsync(
+      `INSERT INTO stock_entries (product_id, quantity, note) VALUES (?, ?, ?)`,
+      result.lastInsertRowId,
+      input.quantity,
+      'Stock initial'
+    );
+  }
+  return result.lastInsertRowId;
+}
+
+export async function updateProduct(id: number, input: NewProduct): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `UPDATE products SET name = ?, category = ?, purchase_price = ?, sale_price = ?,
+     low_stock_threshold = ?, updated_at = datetime('now') WHERE id = ?`,
+    input.name,
+    input.category ?? null,
+    input.purchase_price,
+    input.sale_price,
+    input.low_stock_threshold ?? 3,
+    id
+  );
+}
+
+export async function deleteProduct(id: number): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM products WHERE id = ?', id);
+}
+
+export async function addStock(productId: number, quantity: number, note?: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `UPDATE products SET quantity = quantity + ?, updated_at = datetime('now') WHERE id = ?`,
+    quantity,
+    productId
+  );
+  await db.runAsync(
+    `INSERT INTO stock_entries (product_id, quantity, note) VALUES (?, ?, ?)`,
+    productId,
+    quantity,
+    note ?? null
+  );
+}
+
+export async function listStockEntries(productId?: number): Promise<StockEntry[]> {
+  const db = await getDb();
+  if (productId) {
+    return db.getAllAsync<StockEntry>(
+      'SELECT * FROM stock_entries WHERE product_id = ? ORDER BY created_at DESC',
+      productId
+    );
+  }
+  return db.getAllAsync<StockEntry>('SELECT * FROM stock_entries ORDER BY created_at DESC');
+}
+
+export async function decrementStock(productId: number, quantity: number): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `UPDATE products SET quantity = quantity - ?, updated_at = datetime('now') WHERE id = ?`,
+    quantity,
+    productId
+  );
+}
