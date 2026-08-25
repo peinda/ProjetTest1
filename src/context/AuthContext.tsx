@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { getSecureItem, setSecureItem } from '../utils/secureStorage';
 
 const PIN_KEY = 'boutique_pin_hash';
 
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const stored = await SecureStore.getItemAsync(PIN_KEY);
+      const stored = await getSecureItem(PIN_KEY);
       setHasPin(!!stored);
       const compatible = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
@@ -41,13 +41,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setPin = async (pin: string) => {
     const hashed = await hashPin(pin);
-    await SecureStore.setItemAsync(PIN_KEY, hashed);
+    await setSecureItem(PIN_KEY, hashed);
     setHasPin(true);
     setIsUnlocked(true);
   };
 
   const verifyPin = async (pin: string) => {
-    const stored = await SecureStore.getItemAsync(PIN_KEY);
+    const stored = await getSecureItem(PIN_KEY);
     if (!stored) return false;
     const hashed = await hashPin(pin);
     const ok = hashed === stored;

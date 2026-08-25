@@ -118,6 +118,7 @@ export default function RootNavigator() {
           component={DashboardScreen}
           options={{
             tabBarIcon: () => <TabIcon symbol="📊" />,
+            tabBarLabel: 'Résumé',
             headerShown: true,
             title: 'Tableau de bord',
             headerStyle: { backgroundColor: colors.primary },
