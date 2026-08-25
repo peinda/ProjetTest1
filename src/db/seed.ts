@@ -11,7 +11,7 @@ import { todayStr, daysAgoStr } from '../utils/date';
 //
 // Catalogue aligné sur les catégories réelles de la boutique (vêtements
 // femme) : Robes, Ensembles_pantalon, Ensembles_jupe, Ensembles_pagne,
-// Jupes, Robe_Cole, Divers.
+// Jupes, Robe_Cole, robes_Enfant, Divers.
 export async function seedSampleDataIfEmpty(): Promise<void> {
   const existing = await listProducts();
   if (existing.length > 0) return;
@@ -22,6 +22,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
   const ensPagne = await createProduct({ name: 'Ensemble pagne bazin', category: 'Ensembles_pagne', purchase_price: 10000, sale_price: 16000, quantity: 3, low_stock_threshold: 3 });
   const jupe = await createProduct({ name: 'Jupe crayon', category: 'Jupes', purchase_price: 4000, sale_price: 7000, quantity: 8, low_stock_threshold: 3 });
   const robeCole = await createProduct({ name: 'Robe Cole soirée', category: 'Robe_Cole', purchase_price: 12000, sale_price: 20000, quantity: 2, low_stock_threshold: 3 });
+  const robeEnfant = await createProduct({ name: 'Robe fillette wax', category: 'robes_Enfant', purchase_price: 3000, sale_price: 5500, quantity: 6, low_stock_threshold: 3 });
   const divers = await createProduct({ name: 'Foulard', category: 'Divers', purchase_price: 1500, sale_price: 3000, quantity: 15, low_stock_threshold: 5 });
 
   const today = todayStr();
@@ -34,6 +35,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
   await createSale({ product_id: ensPantalon, product_name: 'Ensemble pantalon tailleur', quantity: 1, unit_price: 15000, payment_method: 'wave', sale_date: yesterday });
   await createSale({ product_id: robe, product_name: 'Robe wax imprimée', quantity: 2, unit_price: 9500, payment_method: 'especes', sale_date: yesterday });
   await createSale({ product_id: ensJupe, product_name: 'Ensemble jupe chemisier', quantity: 1, unit_price: 13000, payment_method: 'om', sale_date: yesterday });
+  await createSale({ product_id: robeEnfant, product_name: 'Robe fillette wax', quantity: 1, unit_price: 5500, payment_method: 'especes', sale_date: today });
 
   await createAdvance({ target: 'wave', amount: 5000, note: 'Crédit Wave pour un client', advance_date: today });
   await createAdvance({ target: 'om', amount: 3000, note: 'Crédit Orange Money pour un client', advance_date: yesterday });
