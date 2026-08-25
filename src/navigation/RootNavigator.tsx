@@ -18,6 +18,7 @@ import CashHomeScreen from '../screens/cash/CashHomeScreen';
 import AddAdvanceScreen from '../screens/cash/AddAdvanceScreen';
 import ClosureScreen from '../screens/cash/ClosureScreen';
 import ClosureHistoryScreen from '../screens/cash/ClosureHistoryScreen';
+import MonthlyBalanceScreen from '../screens/cash/MonthlyBalanceScreen';
 
 import DebtsListScreen from '../screens/debts/DebtsListScreen';
 import DebtFormScreen from '../screens/debts/DebtFormScreen';
@@ -64,6 +65,7 @@ function CashNavigator() {
       <CashStack.Screen name="AddAdvance" component={AddAdvanceScreen} options={{ title: 'Nouvelle avance' }} />
       <CashStack.Screen name="Closure" component={ClosureScreen} options={{ title: 'Clôture du jour' }} />
       <CashStack.Screen name="ClosureHistory" component={ClosureHistoryScreen} options={{ title: 'Historique des clôtures' }} />
+      <CashStack.Screen name="MonthlyBalance" component={MonthlyBalanceScreen} options={{ title: 'Bilan mensuel' }} />
     </CashStack.Navigator>
   );
 }

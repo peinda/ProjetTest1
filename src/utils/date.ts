@@ -50,3 +50,32 @@ export function startOfMonthStr(): string {
   date.setDate(1);
   return toDateStr(date);
 }
+
+const MONTH_NAMES_FR = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+];
+
+export function currentYearMonth(): string {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function shiftYearMonth(yearMonth: string, delta: number): string {
+  const [y, m] = yearMonth.split('-').map(Number);
+  const date = new Date(y, m - 1 + delta, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function monthRange(yearMonth: string): { start: string; end: string } {
+  const [y, m] = yearMonth.split('-').map(Number);
+  const start = `${yearMonth}-01`;
+  const lastDay = new Date(y, m, 0).getDate();
+  const end = `${yearMonth}-${String(lastDay).padStart(2, '0')}`;
+  return { start, end };
+}
+
+export function formatMonthFr(yearMonth: string): string {
+  const [y, m] = yearMonth.split('-').map(Number);
+  return `${MONTH_NAMES_FR[m - 1]} ${y}`;
+}

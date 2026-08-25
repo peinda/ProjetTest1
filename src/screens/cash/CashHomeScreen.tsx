@@ -79,6 +79,12 @@ export default function CashHomeScreen() {
         label="Historique des clôtures"
         variant="outline"
         onPress={() => navigation.navigate('ClosureHistory')}
+        style={{ marginTop: spacing.md }}
+      />
+      <Button
+        label="Bilan mensuel (Wave / Orange Money)"
+        variant="outline"
+        onPress={() => navigation.navigate('MonthlyBalance')}
         style={{ marginTop: spacing.md, marginBottom: spacing.xl }}
       />
     </ScrollView>

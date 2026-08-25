@@ -132,3 +132,42 @@ export async function listClosures(limit: number = 60): Promise<CashClosure[]> {
     limit
   );
 }
+
+export async function listAdvancesBetween(startDate: string, endDate: string): Promise<CashAdvance[]> {
+  const db = await getDb();
+  return db.getAllAsync<CashAdvance>(
+    'SELECT * FROM cash_advances WHERE advance_date BETWEEN ? AND ? ORDER BY advance_date DESC, created_at DESC',
+    startDate,
+    endDate
+  );
+}
+
+export interface AdvanceTotals {
+  wave: number;
+  om: number;
+}
+
+function sumAdvancesByTarget(advances: CashAdvance[]): AdvanceTotals {
+  const totals: AdvanceTotals = { wave: 0, om: 0 };
+  for (const a of advances) totals[a.target] += a.amount;
+  return totals;
+}
+
+export async function getAdvanceTotalsBetween(startDate: string, endDate: string): Promise<AdvanceTotals> {
+  return sumAdvancesByTarget(await listAdvancesBetween(startDate, endDate));
+}
+
+export async function getAllTimeAdvanceTotals(): Promise<AdvanceTotals> {
+  const db = await getDb();
+  const advances = await db.getAllAsync<CashAdvance>('SELECT * FROM cash_advances');
+  return sumAdvancesByTarget(advances);
+}
+
+export async function hasAnyAdvanceBefore(date: string): Promise<boolean> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ advance_date: string }>(
+    'SELECT advance_date FROM cash_advances WHERE advance_date < ? LIMIT 1',
+    date
+  );
+  return !!row;
+}

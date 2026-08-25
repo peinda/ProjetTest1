@@ -87,6 +87,15 @@ export async function getTotalsByPaymentMethod(date: string): Promise<PaymentTot
   return totals;
 }
 
+export async function getTotalsBetween(startDate: string, endDate: string): Promise<PaymentTotals> {
+  const sales = await listSalesBetween(startDate, endDate);
+  const totals: PaymentTotals = { especes: 0, wave: 0, om: 0 };
+  for (const sale of sales) {
+    totals[sale.payment_method] += sale.total;
+  }
+  return totals;
+}
+
 export interface ProductTotal {
   product_name: string;
   quantity: number;
