@@ -13,6 +13,19 @@ npx expo start
 
 Scannez le QR code avec l'app **Expo Go** sur iPhone, ou lancez sur un simulateur iOS avec `npm run ios` (nécessite un Mac).
 
+Pour un aperçu rapide dans un navigateur : `npx expo start --web`.
+
+## Build iPhone réel (EAS Build)
+
+Le profil `eas.json` est prêt (development / preview / production). Étapes (nécessitent un compte Expo, gratuit, et pour `production` un compte Apple Developer) :
+
+```bash
+npm install -g eas-cli
+eas login
+eas build:configure   # relie le projet à votre compte Expo (première fois uniquement)
+eas build --platform ios --profile preview   # build installable via TestFlight/lien interne
+```
+
 ## Architecture
 
 ```

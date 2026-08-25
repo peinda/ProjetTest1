@@ -41,7 +41,13 @@ export default function LockScreen() {
         setPinValue('');
       } else if (mode === 'confirm') {
         if (next === firstPin) {
-          await setPin(next);
+          try {
+            await setPin(next);
+          } catch {
+            setError("Impossible d'enregistrer le code. Réessayez.");
+            setMode('create');
+            setFirstPin('');
+          }
         } else {
           setError('Les codes ne correspondent pas. Réessayez.');
           setMode('create');
