@@ -1,8 +1,10 @@
 # Baba Robe & Diverss — Gestion Boutique
 
-Application mobile (iPhone) de gestion de stock, ventes et caisse pour un commerce acceptant les paiements en **Espèces**, **Wave** et **Orange Money**.
+Application de gestion de stock, ventes et caisse pour un commerce acceptant les paiements en **Espèces**, **Wave** et **Orange Money**. Utilisable comme app iPhone (Expo Go / EAS Build) ou comme **PWA installable depuis le web** (Vercel).
 
-Ce projet implémente le [Cahier des charges](./Cahier_des_charges_App_Gestion_Boutique.md) : Stock, Ventes, Caisse/Répartition, Dettes clients et Tableau de bord, en React Native (Expo) avec stockage local SQLite (fonctionnement 100% hors-ligne).
+Ce projet implémente le [Cahier des charges](./Cahier_des_charges_App_Gestion_Boutique.md) : Stock (avec photo produit), Ventes, Caisse/Répartition, Dettes clients et Tableau de bord, en React Native (Expo) avec stockage local SQLite (fonctionnement 100% hors-ligne).
+
+Un guide d'utilisation pas-à-pas (toutes les fonctionnalités, écran par écran) est disponible dans `Guide_Baba_Robe_Diverss.pdf`.
 
 ## Démarrage rapide sur iPhone (Expo Go — gratuit, immédiat)
 
@@ -22,9 +24,28 @@ téléphone puisse joindre le serveur.
 
 Limite d'Expo Go : pas d'icône propre sur l'écran d'accueil, et certains
 modules natifs très spécifiques ne fonctionneraient pas (tous ceux utilisés
-ici — SQLite, Face ID, PDF — sont compatibles).
+ici — SQLite, Face ID, PDF, sélection de photo — sont compatibles).
 
-Pour un aperçu rapide dans un navigateur (utile pour le développement, pas pour tester sur le téléphone) : `npx expo start --web`.
+## Version web / PWA (Vercel — gratuit)
+
+L'app tourne aussi entièrement dans le navigateur et peut s'installer sur
+l'écran d'accueil comme une app native (manifeste, icônes, service worker
+hors-ligne — voir `public/` et `app.json` → `web`).
+
+**Aperçu local :**
+```bash
+npx expo start --web
+```
+
+**Déploiement gratuit sur Vercel** (plan Hobby) : le dépôt GitHub est relié
+au projet Vercel, qui redéploie automatiquement à chaque `git push` sur cette
+branche. `vercel.json` définit la commande de build
+(`npx expo export -p web`) et les en-têtes COOP/COEP requis par la version
+web d'expo-sqlite (WebAssembly).
+
+**Installer sur iPhone** (obligatoirement depuis **Safari**, pas Chrome) :
+ouvrir l'URL Vercel → icône *Partager* → *Sur l'écran d'accueil*. Détail pas
+à pas dans `Guide_Baba_Robe_Diverss.pdf`.
 
 ## Build iPhone réel installable (EAS Build)
 
@@ -60,16 +81,19 @@ puis `eas submit --platform ios`.
 
 ```
 App.tsx                     Point d'entrée : init DB, verrouillage PIN/Face ID, navigation
+app.json                    Config Expo (icônes, splash, config web/PWA)
+vercel.json                 Config de build et d'en-têtes pour le déploiement web
+public/                     Manifeste PWA, icônes, service worker, index.html
 src/
   db/                        Couche de persistance SQLite (expo-sqlite)
-    database.ts              Schéma + initialisation
+    database.ts              Schéma + initialisation + migrations légères
     types.ts                 Types des entités
     products.ts, sales.ts,
     cash.ts, debts.ts         Fonctions CRUD par module
   context/AuthContext.tsx     Verrouillage par code PIN (SecureStore) + Face ID
   navigation/                 Bottom tabs + stacks par module
   screens/
-    stock/                    Liste produits, formulaire, réappro, historique
+    stock/                    Liste produits (avec photo), formulaire, réappro, historique
     sales/                    Vente rapide, historique des ventes
     cash/                     Caisse du jour, avances, clôture, export PDF
     debts/                    Dettes clients, remboursements, historique
@@ -77,7 +101,8 @@ src/
     LockScreen.tsx             Écran de code PIN / Face ID
   components/                 Button, Card, Field (UI réutilisable, gros boutons)
   theme/                      Couleurs, espacements, typographie
-  utils/                      Dates, formatage FCFA, export PDF (fiche de caisse)
+  utils/                      Dates, formatage FCFA, export PDF, sélection de photo,
+                               alertes/confirmations cross-plateforme (web + natif)
 ```
 
 ## Logique de répartition de caisse
