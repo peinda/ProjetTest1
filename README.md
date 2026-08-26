@@ -4,27 +4,57 @@ Application mobile (iPhone) de gestion de stock, ventes et caisse pour un commer
 
 Ce projet implémente le [Cahier des charges](./Cahier_des_charges_App_Gestion_Boutique.md) : Stock, Ventes, Caisse/Répartition, Dettes clients et Tableau de bord, en React Native (Expo) avec stockage local SQLite (fonctionnement 100% hors-ligne).
 
-## Démarrage
+## Démarrage rapide sur iPhone (Expo Go — gratuit, immédiat)
 
-```bash
-npm install
-npx expo start
-```
+1. Sur l'iPhone 13 : installer l'app **Expo Go** depuis l'App Store.
+2. Sur l'ordinateur (même réseau Wi-Fi que l'iPhone) :
+   ```bash
+   npm install
+   npx expo start
+   ```
+3. Un QR code s'affiche dans le terminal. Le scanner avec l'appareil photo de
+   l'iPhone (ou directement dans Expo Go) — l'app se lance.
 
-Scannez le QR code avec l'app **Expo Go** sur iPhone, ou lancez sur un simulateur iOS avec `npm run ios` (nécessite un Mac).
+Chaque redémarrage de `npx expo start` doit être fait dans un vrai terminal
+interactif (pas en tâche de fond) : Windows peut demander une autorisation
+pare-feu pour l'accès réseau au premier lancement, à accepter pour que le
+téléphone puisse joindre le serveur.
 
-Pour un aperçu rapide dans un navigateur : `npx expo start --web`.
+Limite d'Expo Go : pas d'icône propre sur l'écran d'accueil, et certains
+modules natifs très spécifiques ne fonctionneraient pas (tous ceux utilisés
+ici — SQLite, Face ID, PDF — sont compatibles).
 
-## Build iPhone réel (EAS Build)
+Pour un aperçu rapide dans un navigateur (utile pour le développement, pas pour tester sur le téléphone) : `npx expo start --web`.
 
-Le profil `eas.json` est prêt (development / preview / production). Étapes (nécessitent un compte Expo, gratuit, et pour `production` un compte Apple Developer) :
+## Build iPhone réel installable (EAS Build)
+
+Pour obtenir une vraie app avec sa propre icône, installable sans Expo Go
+(TestFlight ou lien direct). Le profil `eas.json` est déjà prêt
+(development / preview / production), ainsi que l'icône, le splash screen et
+le `buildNumber` dans `app.json`.
+
+**Prérequis** (comptes à créer/posséder vous-même — étape que je ne peux pas
+faire à votre place) :
+- Un compte Expo (gratuit) sur [expo.dev](https://expo.dev)
+- Un compte **Apple Developer Program** (99 $/an) — obligatoire dès qu'on
+  installe une app hors Expo Go sur un iPhone physique, même en test interne
+
+**Étapes**, dans un terminal interactif :
 
 ```bash
 npm install -g eas-cli
-eas login
-eas build:configure   # relie le projet à votre compte Expo (première fois uniquement)
-eas build --platform ios --profile preview   # build installable via TestFlight/lien interne
+eas login                              # connexion à votre compte Expo
+eas build:configure                    # relie le projet à votre compte (1re fois)
+eas build --platform ios --profile preview   # build installable (TestFlight / lien interne)
 ```
+
+`eas build` demande ensuite vos identifiants Apple Developer (ou les laisse
+gérer automatiquement les certificats). Une fois le build terminé, EAS donne
+un lien pour l'installer via TestFlight, ou un lien direct pour un profil
+`preview`/`development` (distribution interne).
+
+Pour publier sur l'App Store plus tard : `eas build --profile production`
+puis `eas submit --platform ios`.
 
 ## Architecture
 
