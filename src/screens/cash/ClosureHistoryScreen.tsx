@@ -1,18 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { listClosures } from '../../db/cash';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CashStackParamList } from '../../navigation/types';
+import { listClosures, deleteClosure } from '../../db/cash';
 import { CashClosure } from '../../db/types';
 import { colors, spacing, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
 import { formatDateFr } from '../../utils/date';
 import Card from '../../components/Card';
+import Button from '../../components/Button';
+import { showAlert } from '../../utils/alert';
+
+type Nav = NativeStackNavigationProp<CashStackParamList, 'ClosureHistory'>;
 
 export default function ClosureHistoryScreen() {
+  const navigation = useNavigation<Nav>();
   const [closures, setClosures] = useState<CashClosure[]>([]);
 
-  useEffect(() => {
-    listClosures().then(setClosures);
+  const load = useCallback(async () => {
+    setClosures(await listClosures());
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
+
+  const onDelete = (closure: CashClosure) => {
+    showAlert(
+      'Supprimer la clôture',
+      `Supprimer la clôture du ${formatDateFr(closure.closure_date)} ? Cette action est irréversible.`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteClosure(closure.id);
+            load();
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -36,6 +68,15 @@ export default function ClosureHistoryScreen() {
               <Text style={styles.line}>Wave : {formatFCFA(item.counted_wave ?? 0)}</Text>
               <Text style={styles.line}>Orange Money : {formatFCFA(item.counted_om ?? 0)}</Text>
               {!!item.note && <Text style={styles.note}>{item.note}</Text>}
+              <View style={styles.actions}>
+                <Button
+                  label="Modifier"
+                  variant="outline"
+                  onPress={() => navigation.navigate('Closure', { date: item.closure_date })}
+                  style={styles.actionBtn}
+                />
+                <Button label="Supprimer" variant="danger" onPress={() => onDelete(item)} style={styles.actionBtn} />
+              </View>
             </Card>
           );
         }}
@@ -52,4 +93,6 @@ const styles = StyleSheet.create({
   gapBadge: { color: colors.danger, fontWeight: '700', fontSize: fontSize.sm },
   line: { color: colors.text, marginTop: 2 },
   note: { color: colors.textMuted, marginTop: spacing.xs, fontStyle: 'italic' },
+  actions: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.sm },
+  actionBtn: { flex: 1, minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
 });

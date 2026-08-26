@@ -13,6 +13,7 @@ import StockHistoryScreen from '../screens/stock/StockHistoryScreen';
 
 import QuickSaleScreen from '../screens/sales/QuickSaleScreen';
 import SalesHistoryScreen from '../screens/sales/SalesHistoryScreen';
+import EditSaleScreen from '../screens/sales/EditSaleScreen';
 
 import CashHomeScreen from '../screens/cash/CashHomeScreen';
 import AddAdvanceScreen from '../screens/cash/AddAdvanceScreen';
@@ -44,6 +45,7 @@ function SalesNavigator() {
     <SalesStack.Navigator screenOptions={screenOptions}>
       <SalesStack.Screen name="QuickSale" component={QuickSaleScreen} options={{ title: 'Vente rapide' }} />
       <SalesStack.Screen name="SalesHistory" component={SalesHistoryScreen} options={{ title: 'Historique des ventes' }} />
+      <SalesStack.Screen name="EditSale" component={EditSaleScreen} options={{ title: 'Modifier la vente' }} />
     </SalesStack.Navigator>
   );
 }

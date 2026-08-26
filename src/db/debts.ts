@@ -74,6 +74,73 @@ export async function recordPayment(debtId: number, amount: number, date?: strin
   });
 }
 
+export async function updateDebt(id: number, input: NewDebt): Promise<void> {
+  const db = await getDb();
+  await db.withTransactionAsync(async () => {
+    const existing = await db.getFirstAsync<Debt>('SELECT * FROM debts WHERE id = ?', id);
+    if (!existing) return;
+    const paid = existing.amount - existing.remaining_amount;
+    const newRemaining = Math.max(0, Math.min(input.amount, input.amount - paid));
+    const newStatus = newRemaining <= 0 ? 'solde' : 'en_cours';
+    await db.runAsync(
+      `UPDATE debts SET client_name = ?, client_phone = ?, amount = ?, remaining_amount = ?,
+       product = ?, note = ?, status = ? WHERE id = ?`,
+      input.client_name,
+      input.client_phone ?? null,
+      input.amount,
+      newRemaining,
+      input.product ?? null,
+      input.note ?? null,
+      newStatus,
+      id
+    );
+  });
+}
+
+export async function getDebtPayment(paymentId: number): Promise<DebtPayment | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<DebtPayment>('SELECT * FROM debt_payments WHERE id = ?', paymentId);
+  return row ?? null;
+}
+
+export async function updatePayment(paymentId: number, amount: number): Promise<void> {
+  const db = await getDb();
+  await db.withTransactionAsync(async () => {
+    const payment = await db.getFirstAsync<DebtPayment>('SELECT * FROM debt_payments WHERE id = ?', paymentId);
+    if (!payment) return;
+    const debt = await db.getFirstAsync<Debt>('SELECT * FROM debts WHERE id = ?', payment.debt_id);
+    if (!debt) return;
+    const newRemaining = Math.max(0, Math.min(debt.amount, debt.remaining_amount + payment.amount - amount));
+    const newStatus = newRemaining <= 0 ? 'solde' : 'en_cours';
+    await db.runAsync('UPDATE debt_payments SET amount = ? WHERE id = ?', amount, paymentId);
+    await db.runAsync(
+      'UPDATE debts SET remaining_amount = ?, status = ? WHERE id = ?',
+      newRemaining,
+      newStatus,
+      debt.id
+    );
+  });
+}
+
+export async function deletePayment(paymentId: number): Promise<void> {
+  const db = await getDb();
+  await db.withTransactionAsync(async () => {
+    const payment = await db.getFirstAsync<DebtPayment>('SELECT * FROM debt_payments WHERE id = ?', paymentId);
+    if (!payment) return;
+    const debt = await db.getFirstAsync<Debt>('SELECT * FROM debts WHERE id = ?', payment.debt_id);
+    if (!debt) return;
+    const newRemaining = Math.max(0, Math.min(debt.amount, debt.remaining_amount + payment.amount));
+    const newStatus = newRemaining <= 0 ? 'solde' : 'en_cours';
+    await db.runAsync('DELETE FROM debt_payments WHERE id = ?', paymentId);
+    await db.runAsync(
+      'UPDATE debts SET remaining_amount = ?, status = ? WHERE id = ?',
+      newRemaining,
+      newStatus,
+      debt.id
+    );
+  });
+}
+
 export async function getTotalOutstanding(): Promise<number> {
   const db = await getDb();
   const row = await db.getFirstAsync<{ total: number | null }>(

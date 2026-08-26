@@ -1,21 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { createDebt } from '../../db/debts';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { createDebt, getDebt, updateDebt } from '../../db/debts';
+import { DebtsStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, isNonEmpty, isValidPhone, MAX_LENGTHS } from '../../utils/validation';
 import { showAlert } from '../../utils/alert';
 
+type Nav = NativeStackNavigationProp<DebtsStackParamList, 'DebtForm'>;
+type Route = RouteProp<DebtsStackParamList, 'DebtForm'>;
+
 export default function DebtFormScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Nav>();
+  const route = useRoute<Route>();
+  const debtId = route.params?.debtId;
+  const isEditing = debtId != null;
+
   const [clientName, setClientName] = useState('');
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
   const [product, setProduct] = useState('');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({ title: isEditing ? 'Modifier la dette' : 'Nouvelle dette' });
+  }, [navigation, isEditing]);
+
+  useEffect(() => {
+    if (debtId == null) return;
+    getDebt(debtId).then((debt) => {
+      if (!debt) return;
+      setClientName(debt.client_name);
+      setPhone(debt.client_phone ?? '');
+      setAmount(String(debt.amount));
+      setProduct(debt.product ?? '');
+      setNote(debt.note ?? '');
+    });
+  }, [debtId]);
 
   const onSave = async () => {
     if (!isNonEmpty(clientName)) {
@@ -33,13 +58,18 @@ export default function DebtFormScreen() {
     }
     setSaving(true);
     try {
-      await createDebt({
+      const payload = {
         client_name: clientName.trim(),
         client_phone: phone.trim() || null,
         amount: amountNum,
         product: product.trim() || null,
         note: note.trim() || null,
-      });
+      };
+      if (debtId != null) {
+        await updateDebt(debtId, payload);
+      } else {
+        await createDebt(payload);
+      }
       navigation.goBack();
     } finally {
       setSaving(false);
@@ -77,7 +107,11 @@ export default function DebtFormScreen() {
         maxLength={MAX_LENGTHS.name}
       />
       <Field label="Note (optionnel)" value={note} onChangeText={setNote} maxLength={MAX_LENGTHS.note} />
-      <Button label={saving ? 'Enregistrement...' : 'Enregistrer la dette'} onPress={onSave} disabled={saving} />
+      <Button
+        label={saving ? 'Enregistrement...' : isEditing ? 'Enregistrer les modifications' : 'Enregistrer la dette'}
+        onPress={onSave}
+        disabled={saving}
+      />
     </ScrollView>
   );
 }

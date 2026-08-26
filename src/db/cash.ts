@@ -142,6 +142,11 @@ export async function saveClosure(
   }
 }
 
+export async function deleteClosure(id: number): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM cash_closures WHERE id = ?', id);
+}
+
 export async function listClosures(limit: number = 60): Promise<CashClosure[]> {
   const db = await getDb();
   return db.getAllAsync<CashClosure>(

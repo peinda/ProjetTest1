@@ -92,6 +92,35 @@ export async function listStockEntries(productId?: number): Promise<StockEntry[]
   return db.getAllAsync<StockEntry>('SELECT * FROM stock_entries ORDER BY created_at DESC');
 }
 
+export async function updateStockEntry(entryId: number, quantity: number, note?: string | null): Promise<void> {
+  const db = await getDb();
+  await db.withTransactionAsync(async () => {
+    const entry = await db.getFirstAsync<StockEntry>('SELECT * FROM stock_entries WHERE id = ?', entryId);
+    if (!entry) return;
+    const diff = quantity - entry.quantity;
+    await db.runAsync(
+      `UPDATE products SET quantity = quantity + ?, updated_at = datetime('now') WHERE id = ?`,
+      diff,
+      entry.product_id
+    );
+    await db.runAsync('UPDATE stock_entries SET quantity = ?, note = ? WHERE id = ?', quantity, note ?? null, entryId);
+  });
+}
+
+export async function deleteStockEntry(entryId: number): Promise<void> {
+  const db = await getDb();
+  await db.withTransactionAsync(async () => {
+    const entry = await db.getFirstAsync<StockEntry>('SELECT * FROM stock_entries WHERE id = ?', entryId);
+    if (!entry) return;
+    await db.runAsync(
+      `UPDATE products SET quantity = quantity - ?, updated_at = datetime('now') WHERE id = ?`,
+      entry.quantity,
+      entry.product_id
+    );
+    await db.runAsync('DELETE FROM stock_entries WHERE id = ?', entryId);
+  });
+}
+
 export async function decrementStock(productId: number, quantity: number): Promise<void> {
   const db = await getDb();
   await db.runAsync(

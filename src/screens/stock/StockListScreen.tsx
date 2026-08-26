@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StockStackParamList } from '../../navigation/types';
@@ -64,31 +64,35 @@ export default function StockListScreen() {
         renderItem={({ item }) => {
           const low = item.quantity <= item.low_stock_threshold;
           return (
-            <Pressable
-              onLongPress={() => onDelete(item)}
-              onPress={() => navigation.navigate('ProductForm', { productId: item.id })}
-            >
-              <Card style={low ? styles.lowCard : undefined}>
-                <View style={styles.row}>
-                  {item.image_uri ? (
-                    <Image source={{ uri: item.image_uri }} style={styles.thumb} resizeMode="cover" />
-                  ) : (
-                    <View style={styles.thumbPlaceholder}>
-                      <Text style={styles.thumbPlaceholderIcon}>📦</Text>
-                    </View>
-                  )}
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.name}>{item.name}</Text>
-                    {!!item.category && <Text style={styles.category}>{item.category}</Text>}
-                    <Text style={styles.price}>{formatFCFA(item.sale_price)}</Text>
+            <Card style={low ? styles.lowCard : undefined}>
+              <View style={styles.row}>
+                {item.image_uri ? (
+                  <Image source={{ uri: item.image_uri }} style={styles.thumb} resizeMode="cover" />
+                ) : (
+                  <View style={styles.thumbPlaceholder}>
+                    <Text style={styles.thumbPlaceholderIcon}>📦</Text>
                   </View>
-                  <View style={styles.qtyBox}>
-                    <Text style={[styles.qty, low && styles.qtyLow]}>{item.quantity}</Text>
-                    <Text style={styles.qtyLabel}>en stock</Text>
-                  </View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.name}>{item.name}</Text>
+                  {!!item.category && <Text style={styles.category}>{item.category}</Text>}
+                  <Text style={styles.price}>{formatFCFA(item.sale_price)}</Text>
                 </View>
-              </Card>
-            </Pressable>
+                <View style={styles.qtyBox}>
+                  <Text style={[styles.qty, low && styles.qtyLow]}>{item.quantity}</Text>
+                  <Text style={styles.qtyLabel}>en stock</Text>
+                </View>
+              </View>
+              <View style={styles.productActions}>
+                <Button
+                  label="Modifier"
+                  variant="outline"
+                  onPress={() => navigation.navigate('ProductForm', { productId: item.id })}
+                  style={styles.productActionBtn}
+                />
+                <Button label="Supprimer" variant="danger" onPress={() => onDelete(item)} style={styles.productActionBtn} />
+              </View>
+            </Card>
           );
         }}
       />
@@ -132,6 +136,15 @@ const styles = StyleSheet.create({
   qtyLow: { color: colors.danger },
   qtyLabel: { fontSize: 11, color: colors.textMuted },
   lowCard: { borderWidth: 1, borderColor: colors.danger },
+  productActions: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  productActionBtn: { flex: 1, minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
   footer: {
     position: 'absolute',
     bottom: 0,

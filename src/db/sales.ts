@@ -39,6 +39,43 @@ export async function createSale(input: NewSale): Promise<number> {
   return saleId;
 }
 
+export async function getSaleById(id: number): Promise<Sale | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<Sale>('SELECT * FROM sales WHERE id = ?', id);
+  return row ?? null;
+}
+
+export interface UpdateSale {
+  quantity: number;
+  unit_price: number;
+  payment_method: PaymentMethod;
+}
+
+export async function updateSale(id: number, input: UpdateSale): Promise<void> {
+  const db = await getDb();
+  await db.withTransactionAsync(async () => {
+    const sale = await db.getFirstAsync<Sale>('SELECT * FROM sales WHERE id = ?', id);
+    if (!sale) return;
+    if (sale.product_id) {
+      const qtyDiff = sale.quantity - input.quantity;
+      await db.runAsync(
+        `UPDATE products SET quantity = quantity + ?, updated_at = datetime('now') WHERE id = ?`,
+        qtyDiff,
+        sale.product_id
+      );
+    }
+    const total = input.quantity * input.unit_price;
+    await db.runAsync(
+      `UPDATE sales SET quantity = ?, unit_price = ?, total = ?, payment_method = ? WHERE id = ?`,
+      input.quantity,
+      input.unit_price,
+      total,
+      input.payment_method,
+      id
+    );
+  });
+}
+
 export async function deleteSale(id: number, restock: boolean = true): Promise<void> {
   const db = await getDb();
   await db.withTransactionAsync(async () => {

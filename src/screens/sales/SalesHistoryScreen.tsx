@@ -1,15 +1,21 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { listSalesByDate, getTotalsByPaymentMethod, deleteSale } from '../../db/sales';
 import { Sale } from '../../db/types';
+import { SalesStackParamList } from '../../navigation/types';
 import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA, PAYMENT_LABELS } from '../../utils/format';
 import { todayStr, formatDateFr, toDateStr } from '../../utils/date';
 import Card from '../../components/Card';
+import Button from '../../components/Button';
 import { showAlert } from '../../utils/alert';
 
+type Nav = NativeStackNavigationProp<SalesStackParamList, 'SalesHistory'>;
+
 export default function SalesHistoryScreen() {
+  const navigation = useNavigation<Nav>();
   const [date, setDate] = useState(todayStr());
   const [sales, setSales] = useState<Sale[]>([]);
   const [totals, setTotals] = useState({ especes: 0, wave: 0, om: 0 });
@@ -74,19 +80,26 @@ export default function SalesHistoryScreen() {
         contentContainerStyle={{ paddingBottom: spacing.xl }}
         ListEmptyComponent={<Text style={styles.empty}>Aucune vente ce jour-là.</Text>}
         renderItem={({ item }) => (
-          <Pressable onLongPress={() => onDelete(item)}>
-            <Card>
-              <View style={styles.saleRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.saleName}>
-                    {item.product_name} × {item.quantity}
-                  </Text>
-                  <Text style={styles.saleMethod}>{PAYMENT_LABELS[item.payment_method]}</Text>
-                </View>
-                <Text style={styles.saleTotal}>{formatFCFA(item.total)}</Text>
+          <Card>
+            <View style={styles.saleRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.saleName}>
+                  {item.product_name} × {item.quantity}
+                </Text>
+                <Text style={styles.saleMethod}>{PAYMENT_LABELS[item.payment_method]}</Text>
               </View>
-            </Card>
-          </Pressable>
+              <Text style={styles.saleTotal}>{formatFCFA(item.total)}</Text>
+            </View>
+            <View style={styles.saleActions}>
+              <Button
+                label="Modifier"
+                variant="outline"
+                onPress={() => navigation.navigate('EditSale', { saleId: item.id })}
+                style={styles.saleActionBtn}
+              />
+              <Button label="Supprimer" variant="danger" onPress={() => onDelete(item)} style={styles.saleActionBtn} />
+            </View>
+          </Card>
         )}
       />
     </View>
@@ -134,4 +147,13 @@ const styles = StyleSheet.create({
   saleName: { fontWeight: '700', color: colors.text, fontSize: fontSize.md },
   saleMethod: { color: colors.textMuted, marginTop: 2, fontSize: fontSize.sm },
   saleTotal: { fontWeight: '700', color: colors.primary, fontSize: fontSize.md },
+  saleActions: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  saleActionBtn: { flex: 1, minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
 });

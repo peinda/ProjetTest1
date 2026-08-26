@@ -207,6 +207,12 @@ export default function ProductFormScreen() {
             placeholder="Ex: 10"
           />
           <Button label="Ajouter au stock" variant="secondary" onPress={onRestock} />
+          <View style={{ height: spacing.sm }} />
+          <Button
+            label="Historique des entrées de stock"
+            variant="outline"
+            onPress={() => navigation.navigate('StockHistory', { productId })}
+          />
           <View style={{ height: spacing.lg }} />
           <Button label="Supprimer ce produit" variant="danger" onPress={onDelete} />
         </View>

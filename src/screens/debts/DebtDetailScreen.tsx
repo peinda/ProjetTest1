@@ -1,8 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DebtsStackParamList } from '../../navigation/types';
-import { getDebt, listDebtPayments, recordPayment, deleteDebt } from '../../db/debts';
+import {
+  getDebt,
+  listDebtPayments,
+  recordPayment,
+  updatePayment,
+  deletePayment,
+  deleteDebt,
+} from '../../db/debts';
 import { Debt, DebtPayment } from '../../db/types';
 import { colors, spacing, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
@@ -13,10 +21,11 @@ import Field from '../../components/Field';
 import { parseAmount } from '../../utils/validation';
 import { showAlert } from '../../utils/alert';
 
+type Nav = NativeStackNavigationProp<DebtsStackParamList, 'DebtDetail'>;
 type R = RouteProp<DebtsStackParamList, 'DebtDetail'>;
 
 export default function DebtDetailScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Nav>();
   const route = useRoute<R>();
   const { debtId } = route.params;
 
@@ -24,6 +33,8 @@ export default function DebtDetailScreen() {
   const [payments, setPayments] = useState<DebtPayment[]>([]);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [saving, setSaving] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<DebtPayment | null>(null);
+  const [editAmount, setEditAmount] = useState('');
 
   const load = useCallback(async () => {
     setDebt(await getDebt(debtId));
@@ -58,6 +69,52 @@ export default function DebtDetailScreen() {
     }
   };
 
+  const onStartEditPayment = (payment: DebtPayment) => {
+    setEditingPayment(payment);
+    setEditAmount(String(payment.amount));
+  };
+
+  const onCancelEditPayment = () => {
+    setEditingPayment(null);
+    setEditAmount('');
+  };
+
+  const onSaveEditPayment = async () => {
+    if (!editingPayment) return;
+    const amount = parseAmount(editAmount);
+    if (amount === null) {
+      showAlert('Montant invalide', 'Saisissez un montant supérieur à 0.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await updatePayment(editingPayment.id, amount);
+      setEditingPayment(null);
+      setEditAmount('');
+      load();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onDeletePayment = (payment: DebtPayment) => {
+    showAlert(
+      'Supprimer ce remboursement',
+      `Supprimer le remboursement de ${formatFCFA(payment.amount)} ? Le solde dû sera recrédité.`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            await deletePayment(payment.id);
+            load();
+          },
+        },
+      ]
+    );
+  };
+
   const onDelete = () => {
     showAlert('Supprimer la dette', 'Cette action est irréversible.', [
       { text: 'Annuler', style: 'cancel' },
@@ -86,6 +143,12 @@ export default function DebtDetailScreen() {
         <Text style={styles.amountLabel}>Restant dû</Text>
         <Text style={[styles.amountValue, { color: colors.danger }]}>{formatFCFA(debt.remaining_amount)}</Text>
         <Text style={styles.status}>{debt.status === 'solde' ? '✅ Soldée' : 'En cours'}</Text>
+        <Button
+          label="Modifier les informations"
+          variant="outline"
+          onPress={() => navigation.navigate('DebtForm', { debtId })}
+          style={{ marginTop: spacing.md }}
+        />
       </Card>
 
       {debt.status === 'en_cours' && (
@@ -107,9 +170,42 @@ export default function DebtDetailScreen() {
         <Card>
           <Text style={styles.sectionTitle}>Historique des remboursements</Text>
           {payments.map((p) => (
-            <View key={p.id} style={styles.paymentRow}>
-              <Text style={styles.paymentDate}>{formatDateTimeFr(p.created_at)}</Text>
-              <Text style={styles.paymentAmount}>{formatFCFA(p.amount)}</Text>
+            <View key={p.id} style={styles.paymentBlock}>
+              {editingPayment?.id === p.id ? (
+                <View>
+                  <Field
+                    label="Montant remboursé (FCFA)"
+                    value={editAmount}
+                    onChangeText={setEditAmount}
+                    keyboardType="numeric"
+                  />
+                  <View style={styles.paymentEditActions}>
+                    <Button label="Annuler" variant="outline" onPress={onCancelEditPayment} style={{ flex: 1 }} />
+                    <Button label="Enregistrer" onPress={onSaveEditPayment} disabled={saving} style={{ flex: 1 }} />
+                  </View>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.paymentRow}>
+                    <Text style={styles.paymentDate}>{formatDateTimeFr(p.created_at)}</Text>
+                    <Text style={styles.paymentAmount}>{formatFCFA(p.amount)}</Text>
+                  </View>
+                  <View style={styles.paymentActions}>
+                    <Button
+                      label="Modifier"
+                      variant="outline"
+                      onPress={() => onStartEditPayment(p)}
+                      style={styles.paymentActionBtn}
+                    />
+                    <Button
+                      label="Supprimer"
+                      variant="danger"
+                      onPress={() => onDeletePayment(p)}
+                      style={styles.paymentActionBtn}
+                    />
+                  </View>
+                </>
+              )}
             </View>
           ))}
         </Card>
@@ -129,7 +225,11 @@ const styles = StyleSheet.create({
   amountValue: { fontSize: fontSize.xl, fontWeight: '800', color: colors.text },
   status: { marginTop: spacing.sm, fontWeight: '700', color: colors.primary },
   sectionTitle: { fontWeight: '700', color: colors.textMuted, marginBottom: spacing.sm },
+  paymentBlock: { paddingVertical: spacing.xs, borderBottomWidth: 1, borderBottomColor: colors.border },
   paymentRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
   paymentDate: { color: colors.textMuted, fontSize: fontSize.sm },
   paymentAmount: { fontWeight: '700', color: colors.text },
+  paymentActions: { flexDirection: 'row', gap: spacing.xs, marginBottom: spacing.xs },
+  paymentActionBtn: { flex: 1, minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
+  paymentEditActions: { flexDirection: 'row', gap: spacing.xs, marginBottom: spacing.sm },
 });

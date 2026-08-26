@@ -7,6 +7,7 @@ export type StockStackParamList = {
 export type SalesStackParamList = {
   QuickSale: undefined;
   SalesHistory: undefined;
+  EditSale: { saleId: number };
 };
 
 export type CashStackParamList = {
@@ -19,7 +20,7 @@ export type CashStackParamList = {
 
 export type DebtsStackParamList = {
   DebtsList: undefined;
-  DebtForm: undefined;
+  DebtForm: { debtId?: number } | undefined;
   DebtDetail: { debtId: number };
   DebtsHistory: undefined;
 };
