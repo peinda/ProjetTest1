@@ -69,6 +69,12 @@ export default function DebtsListScreen() {
       />
 
       <View style={styles.footer}>
+        <Button
+          label="Dettes soldées"
+          variant="outline"
+          onPress={() => navigation.navigate('DebtsHistory')}
+          style={{ marginBottom: spacing.sm }}
+        />
         <Button label="+ Nouvelle dette" onPress={() => navigation.navigate('DebtForm')} />
       </View>
     </View>

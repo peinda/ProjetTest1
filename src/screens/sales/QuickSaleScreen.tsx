@@ -1,16 +1,20 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { listProducts } from '../../db/products';
 import { createSale } from '../../db/sales';
 import { Product } from '../../db/types';
 import { PaymentMethod } from '../../db/types';
+import { SalesStackParamList } from '../../navigation/types';
 import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA, PAYMENT_LABELS } from '../../utils/format';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, parseQuantity } from '../../utils/validation';
 import { showAlert } from '../../utils/alert';
+
+type Nav = NativeStackNavigationProp<SalesStackParamList, 'QuickSale'>;
 
 const METHODS: PaymentMethod[] = ['especes', 'wave', 'om'];
 const METHOD_COLORS: Record<PaymentMethod, string> = {
@@ -20,6 +24,7 @@ const METHOD_COLORS: Record<PaymentMethod, string> = {
 };
 
 export default function QuickSaleScreen() {
+  const navigation = useNavigation<Nav>();
   const [products, setProducts] = useState<Product[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState('1');
@@ -94,6 +99,12 @@ export default function QuickSaleScreen() {
 
   return (
     <View style={styles.container}>
+      <Button
+        label="Historique des ventes"
+        variant="outline"
+        onPress={() => navigation.navigate('SalesHistory')}
+        style={{ marginBottom: spacing.md }}
+      />
       <Text style={styles.sectionLabel}>1. Choisir le produit</Text>
       <FlatList
         data={products}

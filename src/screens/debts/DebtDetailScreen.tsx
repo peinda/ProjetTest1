@@ -8,7 +8,6 @@ import {
   listDebtPayments,
   recordPayment,
   updatePayment,
-  deletePayment,
   deleteDebt,
 } from '../../db/debts';
 import { Debt, DebtPayment } from '../../db/types';
@@ -97,24 +96,6 @@ export default function DebtDetailScreen() {
     }
   };
 
-  const onDeletePayment = (payment: DebtPayment) => {
-    showAlert(
-      'Supprimer ce remboursement',
-      `Supprimer le remboursement de ${formatFCFA(payment.amount)} ? Le solde dû sera recrédité.`,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: async () => {
-            await deletePayment(payment.id);
-            load();
-          },
-        },
-      ]
-    );
-  };
-
   const onDelete = () => {
     showAlert('Supprimer la dette', 'Cette action est irréversible.', [
       { text: 'Annuler', style: 'cancel' },
@@ -190,20 +171,12 @@ export default function DebtDetailScreen() {
                     <Text style={styles.paymentDate}>{formatDateTimeFr(p.created_at)}</Text>
                     <Text style={styles.paymentAmount}>{formatFCFA(p.amount)}</Text>
                   </View>
-                  <View style={styles.paymentActions}>
-                    <Button
-                      label="Modifier"
-                      variant="outline"
-                      onPress={() => onStartEditPayment(p)}
-                      style={styles.paymentActionBtn}
-                    />
-                    <Button
-                      label="Supprimer"
-                      variant="danger"
-                      onPress={() => onDeletePayment(p)}
-                      style={styles.paymentActionBtn}
-                    />
-                  </View>
+                  <Button
+                    label="Modifier"
+                    variant="outline"
+                    onPress={() => onStartEditPayment(p)}
+                    style={styles.paymentActions}
+                  />
                 </>
               )}
             </View>
@@ -229,7 +202,6 @@ const styles = StyleSheet.create({
   paymentRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
   paymentDate: { color: colors.textMuted, fontSize: fontSize.sm },
   paymentAmount: { fontWeight: '700', color: colors.text },
-  paymentActions: { flexDirection: 'row', gap: spacing.xs, marginBottom: spacing.xs },
-  paymentActionBtn: { flex: 1, minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
+  paymentActions: { marginTop: spacing.xs, marginBottom: spacing.xs, minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
   paymentEditActions: { flexDirection: 'row', gap: spacing.xs, marginBottom: spacing.sm },
 });
