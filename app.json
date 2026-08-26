@@ -25,7 +25,17 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Baba Robe & Diverss",
+      "shortName": "Baba Robe",
+      "description": "Application de gestion de boutique Baba Robe & Diverss",
+      "lang": "fr",
+      "themeColor": "#FAF7F0",
+      "backgroundColor": "#FAF7F0",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "scope": "/"
     },
     "plugins": [
       [
