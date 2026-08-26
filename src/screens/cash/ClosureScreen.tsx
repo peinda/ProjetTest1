@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { CashStackParamList } from '../../navigation/types';
 import { computeDailySheet, getClosure, saveClosure, DailyCashSheet } from '../../db/cash';
@@ -11,6 +11,7 @@ import Button from '../../components/Button';
 import Card from '../../components/Card';
 import { exportClosureToPdf } from '../../utils/pdf';
 import { parseAmount, MAX_LENGTHS } from '../../utils/validation';
+import { showAlert } from '../../utils/alert';
 
 type R = RouteProp<CashStackParamList, 'Closure'>;
 
@@ -58,7 +59,7 @@ export default function ClosureScreen() {
     const wave = parseAmount(countedWave, { allowZero: true });
     const om = parseAmount(countedOm, { allowZero: true });
     if (commerce === null || wave === null || om === null) {
-      Alert.alert('Montant invalide', 'Les montants comptés doivent être des nombres valides (0 ou plus).');
+      showAlert('Montant invalide', 'Les montants comptés doivent être des nombres valides (0 ou plus).');
       return null;
     }
     return { commerce, wave, om };
@@ -70,7 +71,7 @@ export default function ClosureScreen() {
     setSaving(true);
     try {
       await saveClosure(sheet, counted, note.trim() || undefined);
-      Alert.alert('Clôture enregistrée', 'La journée a été clôturée avec succès.', [
+      showAlert('Clôture enregistrée', 'La journée a été clôturée avec succès.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } finally {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createAdvance } from '../../db/cash';
 import { AdvanceTarget } from '../../db/types';
@@ -7,6 +7,7 @@ import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, MAX_LENGTHS } from '../../utils/validation';
+import { showAlert } from '../../utils/alert';
 
 export default function AddAdvanceScreen() {
   const navigation = useNavigation();
@@ -18,7 +19,7 @@ export default function AddAdvanceScreen() {
   const onSave = async () => {
     const amountNum = parseAmount(amount);
     if (amountNum === null) {
-      Alert.alert('Montant invalide', 'Saisissez un montant supérieur à 0.');
+      showAlert('Montant invalide', 'Saisissez un montant supérieur à 0.');
       return;
     }
     setSaving(true);

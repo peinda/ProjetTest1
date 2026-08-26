@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { DebtsStackParamList } from '../../navigation/types';
 import { getDebt, listDebtPayments, recordPayment, deleteDebt } from '../../db/debts';
@@ -11,6 +11,7 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import Field from '../../components/Field';
 import { parseAmount } from '../../utils/validation';
+import { showAlert } from '../../utils/alert';
 
 type R = RouteProp<DebtsStackParamList, 'DebtDetail'>;
 
@@ -40,11 +41,11 @@ export default function DebtDetailScreen() {
   const onPay = async (full: boolean) => {
     const amount = full ? debt.remaining_amount : parseAmount(paymentAmount);
     if (amount === null) {
-      Alert.alert('Montant invalide', 'Saisissez un montant supérieur à 0.');
+      showAlert('Montant invalide', 'Saisissez un montant supérieur à 0.');
       return;
     }
     if (amount > debt.remaining_amount) {
-      Alert.alert('Montant trop élevé', `Le solde restant est de ${formatFCFA(debt.remaining_amount)}.`);
+      showAlert('Montant trop élevé', `Le solde restant est de ${formatFCFA(debt.remaining_amount)}.`);
       return;
     }
     setSaving(true);
@@ -58,7 +59,7 @@ export default function DebtDetailScreen() {
   };
 
   const onDelete = () => {
-    Alert.alert('Supprimer la dette', 'Cette action est irréversible.', [
+    showAlert('Supprimer la dette', 'Cette action est irréversible.', [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Supprimer',

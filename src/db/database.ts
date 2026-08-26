@@ -22,6 +22,7 @@ export async function initDatabase(): Promise<void> {
       sale_price REAL NOT NULL DEFAULT 0,
       quantity INTEGER NOT NULL DEFAULT 0,
       low_stock_threshold INTEGER NOT NULL DEFAULT 3,
+      image_uri TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -98,4 +99,10 @@ export async function initDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_advances_date ON cash_advances(advance_date);
     CREATE INDEX IF NOT EXISTS idx_debts_status ON debts(status);
   `);
+
+  // Migration for databases created before the image_uri column existed.
+  const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(products)');
+  if (!columns.some((c) => c.name === 'image_uri')) {
+    await db.execAsync('ALTER TABLE products ADD COLUMN image_uri TEXT;');
+  }
 }

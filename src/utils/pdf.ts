@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { DailyCashSheet } from '../db/cash';
@@ -58,6 +59,13 @@ export async function exportClosureToPdf(
       </body>
     </html>
   `;
+
+  if (Platform.OS === 'web') {
+    // expo-print's web implementation just opens the browser's print dialog
+    // (no file/uri is produced), which already lets the user save as PDF.
+    await Print.printToFileAsync({ html });
+    return;
+  }
 
   const { uri } = await Print.printToFileAsync({ html });
   if (await Sharing.isAvailableAsync()) {

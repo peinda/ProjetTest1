@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { listProducts } from '../../db/products';
 import { createSale } from '../../db/sales';
@@ -10,6 +10,7 @@ import { formatFCFA, PAYMENT_LABELS } from '../../utils/format';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, parseQuantity } from '../../utils/validation';
+import { showAlert } from '../../utils/alert';
 
 const METHODS: PaymentMethod[] = ['especes', 'wave', 'om'];
 const METHOD_COLORS: Record<PaymentMethod, string> = {
@@ -61,16 +62,16 @@ export default function QuickSaleScreen() {
     if (!selected || !payment) return;
     const qty = parseQuantity(quantity);
     if (qty === null) {
-      Alert.alert('Quantité invalide', 'Saisissez un nombre entier supérieur à 0.');
+      showAlert('Quantité invalide', 'Saisissez un nombre entier supérieur à 0.');
       return;
     }
     const price = parseAmount(unitPrice, { allowZero: true });
     if (price === null) {
-      Alert.alert('Prix invalide', 'Saisissez un montant valide (0 ou plus).');
+      showAlert('Prix invalide', 'Saisissez un montant valide (0 ou plus).');
       return;
     }
     if (qty > selected.quantity) {
-      Alert.alert('Stock insuffisant', `Il ne reste que ${selected.quantity} en stock.`);
+      showAlert('Stock insuffisant', `Il ne reste que ${selected.quantity} en stock.`);
       return;
     }
     setSaving(true);
@@ -85,7 +86,7 @@ export default function QuickSaleScreen() {
       const updated = await listProducts();
       setProducts(updated);
       reset();
-      Alert.alert('Vente enregistrée', `${formatFCFA(total)} — ${PAYMENT_LABELS[payment]}`);
+      showAlert('Vente enregistrée', `${formatFCFA(total)} — ${PAYMENT_LABELS[payment]}`);
     } finally {
       setSaving(false);
     }
@@ -114,6 +115,13 @@ export default function QuickSaleScreen() {
               ]}
               disabled={outOfStock}
             >
+              {item.image_uri ? (
+                <Image source={{ uri: item.image_uri }} style={styles.productChipImage} resizeMode="cover" />
+              ) : (
+                <View style={styles.productChipImagePlaceholder}>
+                  <Text style={{ fontSize: 18 }}>📦</Text>
+                </View>
+              )}
               <Text style={[styles.productChipName, isSelected && styles.productChipTextSelected]}>
                 {item.name}
               </Text>
@@ -209,6 +217,16 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   productChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  productChipImage: { width: '100%', height: 60, borderRadius: radius.sm, marginBottom: spacing.xs },
+  productChipImagePlaceholder: {
+    width: '100%',
+    height: 60,
+    borderRadius: radius.sm,
+    marginBottom: spacing.xs,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   productChipDisabled: { opacity: 0.4 },
   productChipName: { fontWeight: '700', color: colors.text, fontSize: fontSize.md },
   productChipMeta: { color: colors.textMuted, marginTop: 4, fontSize: fontSize.sm },

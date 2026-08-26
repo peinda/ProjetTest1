@@ -10,6 +10,7 @@ export interface Product {
   sale_price: number;
   quantity: number;
   low_stock_threshold: number;
+  image_uri: string | null;
   created_at: string;
   updated_at: string;
 }

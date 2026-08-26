@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, Text, Alert } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, Image, Pressable } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StockStackParamList } from '../../navigation/types';
 import { createProduct, getProduct, updateProduct, addStock, deleteProduct } from '../../db/products';
-import { colors, spacing, fontSize } from '../../theme/theme';
+import { colors, spacing, fontSize, radius } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, parseQuantity, isNonEmpty, MAX_LENGTHS } from '../../utils/validation';
+import { showAlert } from '../../utils/alert';
+import { pickProductImage } from '../../utils/imagePicker';
 
 type Nav = NativeStackNavigationProp<StockStackParamList, 'ProductForm'>;
 type R = RouteProp<StockStackParamList, 'ProductForm'>;
@@ -25,6 +27,7 @@ export default function ProductFormScreen() {
   const [quantity, setQuantity] = useState('');
   const [threshold, setThreshold] = useState('3');
   const [restockAmount, setRestockAmount] = useState('');
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export default function ProductFormScreen() {
         setSalePrice(String(p.sale_price));
         setQuantity(String(p.quantity));
         setThreshold(String(p.low_stock_threshold));
+        setImageUri(p.image_uri);
       });
     }
     navigation.setOptions({ title: productId ? 'Modifier le produit' : 'Nouveau produit' });
@@ -44,27 +48,27 @@ export default function ProductFormScreen() {
 
   const onSave = async () => {
     if (!isNonEmpty(name)) {
-      Alert.alert('Nom requis', 'Veuillez saisir le nom du produit.');
+      showAlert('Nom requis', 'Veuillez saisir le nom du produit.');
       return;
     }
     const purchase = parseAmount(purchasePrice || '0', { allowZero: true });
     if (purchase === null) {
-      Alert.alert('Prix d\'achat invalide', 'Saisissez un montant valide (0 ou plus).');
+      showAlert('Prix d\'achat invalide', 'Saisissez un montant valide (0 ou plus).');
       return;
     }
     const sale = parseAmount(salePrice || '0', { allowZero: true });
     if (sale === null) {
-      Alert.alert('Prix de vente invalide', 'Saisissez un montant valide (0 ou plus).');
+      showAlert('Prix de vente invalide', 'Saisissez un montant valide (0 ou plus).');
       return;
     }
     const qty = isEdit ? 0 : parseQuantity(quantity || '0', { allowZero: true });
     if (qty === null) {
-      Alert.alert('Quantité invalide', 'Saisissez un nombre entier valide (0 ou plus).');
+      showAlert('Quantité invalide', 'Saisissez un nombre entier valide (0 ou plus).');
       return;
     }
     const threshNum = parseQuantity(threshold || '0', { allowZero: true });
     if (threshNum === null) {
-      Alert.alert('Seuil invalide', 'Saisissez un nombre entier valide (0 ou plus).');
+      showAlert('Seuil invalide', 'Saisissez un nombre entier valide (0 ou plus).');
       return;
     }
     setSaving(true);
@@ -76,6 +80,7 @@ export default function ProductFormScreen() {
         sale_price: sale,
         quantity: qty,
         low_stock_threshold: threshNum,
+        image_uri: imageUri,
       };
       if (isEdit && productId) {
         await updateProduct(productId, payload);
@@ -92,19 +97,24 @@ export default function ProductFormScreen() {
     if (!productId) return;
     const amount = parseQuantity(restockAmount);
     if (amount === null) {
-      Alert.alert('Quantité invalide', 'Saisissez un nombre entier supérieur à 0.');
+      showAlert('Quantité invalide', 'Saisissez un nombre entier supérieur à 0.');
       return;
     }
     await addStock(productId, amount, 'Réapprovisionnement');
     setRestockAmount('');
     const p = await getProduct(productId);
     if (p) setQuantity(String(p.quantity));
-    Alert.alert('Stock mis à jour', `+${amount} ajouté au stock.`);
+    showAlert('Stock mis à jour', `+${amount} ajouté au stock.`);
+  };
+
+  const onPickImage = async () => {
+    const uri = await pickProductImage();
+    if (uri) setImageUri(uri);
   };
 
   const onDelete = () => {
     if (!productId) return;
-    Alert.alert('Supprimer', 'Supprimer définitivement ce produit ?', [
+    showAlert('Supprimer', 'Supprimer définitivement ce produit ?', [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Supprimer',
@@ -119,6 +129,27 @@ export default function ProductFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Text style={styles.label}>Photo du produit</Text>
+      <View style={styles.photoRow}>
+        <Pressable onPress={onPickImage} style={styles.photoPreview}>
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.photoImage} resizeMode="cover" />
+          ) : (
+            <Text style={styles.photoPlaceholder}>📷</Text>
+          )}
+        </Pressable>
+        <View style={{ flex: 1, gap: spacing.sm }}>
+          <Button
+            label={imageUri ? 'Changer la photo' : 'Choisir une photo'}
+            variant="outline"
+            onPress={onPickImage}
+          />
+          {!!imageUri && (
+            <Button label="Retirer la photo" variant="outline" onPress={() => setImageUri(null)} />
+          )}
+        </View>
+      </View>
+
       <Field
         label="Nom du produit"
         value={name}
@@ -186,6 +217,31 @@ export default function ProductFormScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  label: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
+    fontWeight: '600',
+  },
+  photoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  photoPreview: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  photoImage: { width: '100%', height: '100%' },
+  photoPlaceholder: { fontSize: 32 },
   restockBlock: {
     marginTop: spacing.xl,
     paddingTop: spacing.lg,

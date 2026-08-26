@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { createDebt } from '../../db/debts';
 import { colors, spacing } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, isNonEmpty, isValidPhone, MAX_LENGTHS } from '../../utils/validation';
+import { showAlert } from '../../utils/alert';
 
 export default function DebtFormScreen() {
   const navigation = useNavigation();
@@ -18,16 +19,16 @@ export default function DebtFormScreen() {
 
   const onSave = async () => {
     if (!isNonEmpty(clientName)) {
-      Alert.alert('Nom requis', 'Veuillez saisir le nom du client.');
+      showAlert('Nom requis', 'Veuillez saisir le nom du client.');
       return;
     }
     if (!isValidPhone(phone)) {
-      Alert.alert('Téléphone invalide', 'Saisissez un numéro valide ou laissez le champ vide.');
+      showAlert('Téléphone invalide', 'Saisissez un numéro valide ou laissez le champ vide.');
       return;
     }
     const amountNum = parseAmount(amount);
     if (amountNum === null) {
-      Alert.alert('Montant invalide', 'Saisissez un montant supérieur à 0.');
+      showAlert('Montant invalide', 'Saisissez un montant supérieur à 0.');
       return;
     }
     setSaving(true);

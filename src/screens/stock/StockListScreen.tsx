@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StockStackParamList } from '../../navigation/types';
@@ -9,6 +9,7 @@ import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
+import { showAlert } from '../../utils/alert';
 
 type Nav = NativeStackNavigationProp<StockStackParamList, 'StockList'>;
 
@@ -27,7 +28,7 @@ export default function StockListScreen() {
   );
 
   const onDelete = (product: Product) => {
-    Alert.alert(
+    showAlert(
       'Supprimer le produit',
       `Supprimer "${product.name}" ? Cette action est irréversible.`,
       [
@@ -69,6 +70,13 @@ export default function StockListScreen() {
             >
               <Card style={low ? styles.lowCard : undefined}>
                 <View style={styles.row}>
+                  {item.image_uri ? (
+                    <Image source={{ uri: item.image_uri }} style={styles.thumb} resizeMode="cover" />
+                  ) : (
+                    <View style={styles.thumbPlaceholder}>
+                      <Text style={styles.thumbPlaceholderIcon}>📦</Text>
+                    </View>
+                  )}
                   <View style={{ flex: 1 }}>
                     <Text style={styles.name}>{item.name}</Text>
                     {!!item.category && <Text style={styles.category}>{item.category}</Text>}
@@ -103,7 +111,19 @@ const styles = StyleSheet.create({
   },
   alertText: { color: colors.accent, fontWeight: '700' },
   empty: { textAlign: 'center', marginTop: spacing.xl, color: colors.textMuted },
-  row: { flexDirection: 'row', alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  thumb: { width: 52, height: 52, borderRadius: radius.sm },
+  thumbPlaceholder: {
+    width: 52,
+    height: 52,
+    borderRadius: radius.sm,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbPlaceholderIcon: { fontSize: 20 },
   name: { fontSize: fontSize.md, fontWeight: '700', color: colors.text },
   category: { fontSize: fontSize.sm, color: colors.textMuted, marginTop: 2 },
   price: { fontSize: fontSize.sm, color: colors.primary, marginTop: 4, fontWeight: '600' },

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { listSalesByDate, getTotalsByPaymentMethod, deleteSale } from '../../db/sales';
 import { Sale } from '../../db/types';
@@ -7,6 +7,7 @@ import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA, PAYMENT_LABELS } from '../../utils/format';
 import { todayStr, formatDateFr, toDateStr } from '../../utils/date';
 import Card from '../../components/Card';
+import { showAlert } from '../../utils/alert';
 
 export default function SalesHistoryScreen() {
   const [date, setDate] = useState(todayStr());
@@ -31,7 +32,7 @@ export default function SalesHistoryScreen() {
   };
 
   const onDelete = (sale: Sale) => {
-    Alert.alert('Annuler la vente', 'Cette vente sera supprimée et le stock recrédité.', [
+    showAlert('Annuler la vente', 'Cette vente sera supprimée et le stock recrédité.', [
       { text: 'Non', style: 'cancel' },
       {
         text: 'Oui, annuler',

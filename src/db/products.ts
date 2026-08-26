@@ -8,6 +8,7 @@ export interface NewProduct {
   sale_price: number;
   quantity: number;
   low_stock_threshold?: number;
+  image_uri?: string | null;
 }
 
 export async function listProducts(): Promise<Product[]> {
@@ -24,14 +25,15 @@ export async function getProduct(id: number): Promise<Product | null> {
 export async function createProduct(input: NewProduct): Promise<number> {
   const db = await getDb();
   const result = await db.runAsync(
-    `INSERT INTO products (name, category, purchase_price, sale_price, quantity, low_stock_threshold)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO products (name, category, purchase_price, sale_price, quantity, low_stock_threshold, image_uri)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     input.name,
     input.category ?? null,
     input.purchase_price,
     input.sale_price,
     input.quantity,
-    input.low_stock_threshold ?? 3
+    input.low_stock_threshold ?? 3,
+    input.image_uri ?? null
   );
   if (input.quantity > 0) {
     await db.runAsync(
@@ -48,12 +50,13 @@ export async function updateProduct(id: number, input: NewProduct): Promise<void
   const db = await getDb();
   await db.runAsync(
     `UPDATE products SET name = ?, category = ?, purchase_price = ?, sale_price = ?,
-     low_stock_threshold = ?, updated_at = datetime('now') WHERE id = ?`,
+     low_stock_threshold = ?, image_uri = ?, updated_at = datetime('now') WHERE id = ?`,
     input.name,
     input.category ?? null,
     input.purchase_price,
     input.sale_price,
     input.low_stock_threshold ?? 3,
+    input.image_uri ?? null,
     id
   );
 }
