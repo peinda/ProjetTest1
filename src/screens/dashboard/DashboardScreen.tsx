@@ -1,13 +1,18 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { listProducts } from '../../db/products';
 import { listSalesBetween, getTotalsByPaymentMethod } from '../../db/sales';
 import { getTotalOutstanding } from '../../db/debts';
+import { DashboardStackParamList } from '../../navigation/types';
 import { colors, spacing, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
 import { todayStr, startOfWeekStr, startOfMonthStr } from '../../utils/date';
 import Card from '../../components/Card';
+import Button from '../../components/Button';
+
+type Nav = NativeStackNavigationProp<DashboardStackParamList, 'Dashboard'>;
 
 interface PeriodTotals {
   especes: number;
@@ -23,6 +28,7 @@ async function sumBetween(start: string, end: string): Promise<PeriodTotals> {
 }
 
 export default function DashboardScreen() {
+  const navigation = useNavigation<Nav>();
   const [todayTotals, setTodayTotals] = useState<PeriodTotals>({ especes: 0, wave: 0, om: 0 });
   const [weekTotals, setWeekTotals] = useState<PeriodTotals>({ especes: 0, wave: 0, om: 0 });
   const [monthTotals, setMonthTotals] = useState<PeriodTotals>({ especes: 0, wave: 0, om: 0 });
@@ -53,6 +59,13 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Button
+        label="Voir les statistiques"
+        variant="outline"
+        onPress={() => navigation.navigate('Statistics')}
+        style={{ marginBottom: spacing.md }}
+      />
+
       <Card>
         <Text style={styles.sectionTitle}>Aujourd'hui</Text>
         <Text style={styles.bigNumber}>{formatFCFA(todaySum)}</Text>

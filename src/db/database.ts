@@ -41,6 +41,7 @@ export async function initDatabase(): Promise<void> {
       product_name TEXT NOT NULL,
       quantity INTEGER NOT NULL,
       unit_price REAL NOT NULL,
+      purchase_price REAL NOT NULL DEFAULT 0,
       total REAL NOT NULL,
       payment_method TEXT NOT NULL CHECK (payment_method IN ('especes', 'wave', 'om')),
       sale_date TEXT NOT NULL,
@@ -104,5 +105,18 @@ export async function initDatabase(): Promise<void> {
   const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(products)');
   if (!columns.some((c) => c.name === 'image_uri')) {
     await db.execAsync('ALTER TABLE products ADD COLUMN image_uri TEXT;');
+  }
+
+  // Migration for databases created before the purchase_price column existed
+  // on sales (needed to compute profit). Backfill from the current product
+  // cost as a best effort for sales recorded before this column existed.
+  const saleColumns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(sales)');
+  if (!saleColumns.some((c) => c.name === 'purchase_price')) {
+    await db.execAsync('ALTER TABLE sales ADD COLUMN purchase_price REAL NOT NULL DEFAULT 0;');
+    await db.execAsync(`
+      UPDATE sales SET purchase_price = COALESCE(
+        (SELECT purchase_price FROM products WHERE products.id = sales.product_id), 0
+      );
+    `);
   }
 }

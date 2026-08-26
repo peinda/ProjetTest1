@@ -29,6 +29,7 @@ export interface Sale {
   product_name: string;
   quantity: number;
   unit_price: number;
+  purchase_price: number;
   total: number;
   payment_method: PaymentMethod;
   sale_date: string;

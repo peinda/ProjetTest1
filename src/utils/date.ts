@@ -79,3 +79,15 @@ export function formatMonthFr(yearMonth: string): string {
   const [y, m] = yearMonth.split('-').map(Number);
   return `${MONTH_NAMES_FR[m - 1]} ${y}`;
 }
+
+export function currentYear(): string {
+  return String(new Date().getFullYear());
+}
+
+export function shiftYear(year: string, delta: number): string {
+  return String(Number(year) + delta);
+}
+
+export function yearRange(year: string): { start: string; end: string } {
+  return { start: `${year}-01-01`, end: `${year}-12-31` };
+}

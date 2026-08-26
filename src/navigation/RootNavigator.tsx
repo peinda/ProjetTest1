@@ -4,7 +4,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text } from 'react-native';
 
-import { StockStackParamList, SalesStackParamList, CashStackParamList, DebtsStackParamList } from './types';
+import {
+  StockStackParamList,
+  SalesStackParamList,
+  CashStackParamList,
+  DebtsStackParamList,
+  DashboardStackParamList,
+} from './types';
 import { colors } from '../theme/theme';
 
 import StockListScreen from '../screens/stock/StockListScreen';
@@ -27,12 +33,14 @@ import DebtDetailScreen from '../screens/debts/DebtDetailScreen';
 import DebtsHistoryScreen from '../screens/debts/DebtsHistoryScreen';
 
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
+import StatisticsScreen from '../screens/dashboard/StatisticsScreen';
 
 const Tab = createBottomTabNavigator();
 const StockStack = createNativeStackNavigator<StockStackParamList>();
 const SalesStack = createNativeStackNavigator<SalesStackParamList>();
 const CashStack = createNativeStackNavigator<CashStackParamList>();
 const DebtsStack = createNativeStackNavigator<DebtsStackParamList>();
+const DashboardStack = createNativeStackNavigator<DashboardStackParamList>();
 
 const screenOptions = {
   headerStyle: { backgroundColor: colors.primary },
@@ -83,6 +91,15 @@ function DebtsNavigator() {
   );
 }
 
+function DashboardNavigator() {
+  return (
+    <DashboardStack.Navigator screenOptions={screenOptions}>
+      <DashboardStack.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Tableau de bord' }} />
+      <DashboardStack.Screen name="Statistics" component={StatisticsScreen} options={{ title: 'Statistiques' }} />
+    </DashboardStack.Navigator>
+  );
+}
+
 function TabIcon({ symbol }: { symbol: string }) {
   return <Text style={{ fontSize: 20 }}>{symbol}</Text>;
 }
@@ -119,14 +136,10 @@ export default function RootNavigator() {
         />
         <Tab.Screen
           name="Résumé"
-          component={DashboardScreen}
+          component={DashboardNavigator}
           options={{
             tabBarIcon: () => <TabIcon symbol="📊" />,
             tabBarLabel: 'Résumé',
-            headerShown: true,
-            title: 'Tableau de bord',
-            headerStyle: { backgroundColor: colors.primary },
-            headerTintColor: '#FFFFFF',
           }}
         />
       </Tab.Navigator>

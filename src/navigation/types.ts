@@ -27,4 +27,5 @@ export type DebtsStackParamList = {
 
 export type DashboardStackParamList = {
   Dashboard: undefined;
+  Statistics: undefined;
 };

@@ -18,13 +18,18 @@ export async function createSale(input: NewSale): Promise<number> {
 
   let saleId = 0;
   await db.withTransactionAsync(async () => {
+    const product = await db.getFirstAsync<{ purchase_price: number }>(
+      'SELECT purchase_price FROM products WHERE id = ?',
+      input.product_id
+    );
     const result = await db.runAsync(
-      `INSERT INTO sales (product_id, product_name, quantity, unit_price, total, payment_method, sale_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO sales (product_id, product_name, quantity, unit_price, purchase_price, total, payment_method, sale_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       input.product_id,
       input.product_name,
       input.quantity,
       input.unit_price,
+      product?.purchase_price ?? 0,
       total,
       input.payment_method,
       saleDate
@@ -100,6 +105,17 @@ export async function listSalesByDate(date: string): Promise<Sale[]> {
   );
 }
 
+export async function getProfitBetween(startDate: string, endDate: string): Promise<number> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ profit: number | null }>(
+    `SELECT SUM((unit_price - purchase_price) * quantity) as profit
+     FROM sales WHERE sale_date BETWEEN ? AND ?`,
+    startDate,
+    endDate
+  );
+  return row?.profit ?? 0;
+}
+
 export async function listSalesBetween(startDate: string, endDate: string): Promise<Sale[]> {
   const db = await getDb();
   return db.getAllAsync<Sale>(
@@ -145,5 +161,20 @@ export async function getTotalsByProduct(date: string): Promise<ProductTotal[]> 
     `SELECT product_name, SUM(quantity) as quantity, SUM(total) as total
      FROM sales WHERE sale_date = ? GROUP BY product_name ORDER BY total DESC`,
     date
+  );
+}
+
+export async function getTopProductsBetween(
+  startDate: string,
+  endDate: string,
+  limit: number = 5
+): Promise<ProductTotal[]> {
+  const db = await getDb();
+  return db.getAllAsync<ProductTotal>(
+    `SELECT product_name, SUM(quantity) as quantity, SUM(total) as total
+     FROM sales WHERE sale_date BETWEEN ? AND ? GROUP BY product_name ORDER BY quantity DESC LIMIT ?`,
+    startDate,
+    endDate,
+    limit
   );
 }
