@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
 
 import { initDatabase } from './src/db/database';
 import { seedSampleDataIfEmpty } from './src/db/seed';
@@ -9,6 +10,8 @@ import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LockScreen from './src/screens/LockScreen';
 import RootNavigator from './src/navigation/RootNavigator';
 import { colors } from './src/theme/theme';
+
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function Gate() {
   const { loading, isUnlocked, lock } = useAuth();
@@ -37,7 +40,9 @@ export default function App() {
   useEffect(() => {
     initDatabase()
       .then(() => (__DEV__ ? seedSampleDataIfEmpty() : undefined))
-      .then(() => setDbReady(true));
+      .then(() => setDbReady(true))
+      .then(() => SplashScreen.hideAsync())
+      .catch(() => undefined);
   }, []);
 
   if (!dbReady) {

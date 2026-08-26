@@ -9,6 +9,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.babarobe.gestionboutique",
+      "buildNumber": "1",
       "infoPlist": {
         "NSFaceIDUsageDescription": "Utilisé pour déverrouiller l'application et protéger vos données financières."
       }
@@ -31,6 +32,14 @@
         "expo-local-authentication",
         {
           "faceIDPermission": "Utilisé pour déverrouiller l'application et protéger vos données financières."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FAF7F0",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 260
         }
       ]
     ]
