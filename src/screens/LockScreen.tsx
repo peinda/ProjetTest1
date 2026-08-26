@@ -109,8 +109,8 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   logo: {
-    width: 220,
-    height: 220,
+    width: 140,
+    height: 140,
     borderRadius: radius.lg,
     marginBottom: spacing.lg,
   },
