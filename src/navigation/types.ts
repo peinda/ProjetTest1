@@ -11,7 +11,7 @@ export type SalesStackParamList = {
 
 export type CashStackParamList = {
   CashHome: undefined;
-  AddAdvance: undefined;
+  AddAdvance: { advanceId?: number } | undefined;
   Closure: { date: string };
   ClosureHistory: undefined;
   MonthlyBalance: undefined;

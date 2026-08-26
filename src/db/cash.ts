@@ -30,6 +30,23 @@ export async function listAdvancesByDate(date: string): Promise<CashAdvance[]> {
   );
 }
 
+export async function getAdvanceById(id: number): Promise<CashAdvance | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<CashAdvance>('SELECT * FROM cash_advances WHERE id = ?', id);
+  return row ?? null;
+}
+
+export async function updateAdvance(id: number, input: NewAdvance): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `UPDATE cash_advances SET target = ?, amount = ?, note = ? WHERE id = ?`,
+    input.target,
+    input.amount,
+    input.note ?? null,
+    id
+  );
+}
+
 export async function deleteAdvance(id: number): Promise<void> {
   const db = await getDb();
   await db.runAsync('DELETE FROM cash_advances WHERE id = ?', id);

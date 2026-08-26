@@ -1,20 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { createAdvance } from '../../db/cash';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { createAdvance, getAdvanceById, updateAdvance } from '../../db/cash';
 import { AdvanceTarget } from '../../db/types';
+import { CashStackParamList } from '../../navigation/types';
 import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, MAX_LENGTHS } from '../../utils/validation';
 import { showAlert } from '../../utils/alert';
 
+type Nav = NativeStackNavigationProp<CashStackParamList, 'AddAdvance'>;
+type Route = RouteProp<CashStackParamList, 'AddAdvance'>;
+
 export default function AddAdvanceScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Nav>();
+  const route = useRoute<Route>();
+  const advanceId = route.params?.advanceId;
+  const isEditing = advanceId != null;
+
   const [target, setTarget] = useState<AdvanceTarget>('wave');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({ title: isEditing ? 'Modifier l’avance' : 'Nouvelle avance' });
+  }, [navigation, isEditing]);
+
+  useEffect(() => {
+    if (advanceId == null) return;
+    getAdvanceById(advanceId).then((advance) => {
+      if (!advance) return;
+      setTarget(advance.target);
+      setAmount(String(advance.amount));
+      setNote(advance.note ?? '');
+    });
+  }, [advanceId]);
 
   const onSave = async () => {
     const amountNum = parseAmount(amount);
@@ -24,7 +47,11 @@ export default function AddAdvanceScreen() {
     }
     setSaving(true);
     try {
-      await createAdvance({ target, amount: amountNum, note: note.trim() || null });
+      if (advanceId != null) {
+        await updateAdvance(advanceId, { target, amount: amountNum, note: note.trim() || null });
+      } else {
+        await createAdvance({ target, amount: amountNum, note: note.trim() || null });
+      }
       navigation.goBack();
     } finally {
       setSaving(false);
@@ -67,7 +94,11 @@ export default function AddAdvanceScreen() {
         Cette somme sera considérée comme due au commerce par le compte {target === 'wave' ? 'Wave' : 'Orange Money'}.
       </Text>
 
-      <Button label={saving ? 'Enregistrement...' : 'Enregistrer l’avance'} onPress={onSave} disabled={saving} />
+      <Button
+        label={saving ? 'Enregistrement...' : isEditing ? 'Enregistrer les modifications' : 'Enregistrer l’avance'}
+        onPress={onSave}
+        disabled={saving}
+      />
     </View>
   );
 }

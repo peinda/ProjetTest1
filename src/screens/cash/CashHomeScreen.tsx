@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, FlatList, ScrollView } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CashStackParamList } from '../../navigation/types';
-import { computeDailySheet, listAdvancesByDate, DailyCashSheet } from '../../db/cash';
+import { computeDailySheet, listAdvancesByDate, deleteAdvance, DailyCashSheet } from '../../db/cash';
 import { CashAdvance } from '../../db/types';
 import { colors, spacing, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
 import { todayStr, formatDateFr, formatDateTimeFr } from '../../utils/date';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import { showAlert } from '../../utils/alert';
 
 type Nav = NativeStackNavigationProp<CashStackParamList, 'CashHome'>;
 
@@ -29,6 +30,24 @@ export default function CashHomeScreen() {
       load();
     }, [load])
   );
+
+  const onDeleteAdvance = (advance: CashAdvance) => {
+    showAlert(
+      'Supprimer l’avance',
+      `Supprimer l’avance de ${formatFCFA(advance.amount)} vers ${advance.target === 'wave' ? 'Wave' : 'Orange Money'} ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteAdvance(advance.id);
+            load();
+          },
+        },
+      ]
+    );
+  };
 
   if (!sheet) return null;
 
@@ -63,8 +82,24 @@ export default function CashHomeScreen() {
           <Text style={styles.sectionTitle}>Détail des avances du jour</Text>
           {advances.map((a) => (
             <View key={a.id} style={styles.advanceRow}>
-              <Text style={styles.advanceTarget}>{a.target === 'wave' ? 'Wave' : 'Orange Money'}</Text>
-              <Text style={styles.advanceAmount}>{formatFCFA(a.amount)}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.advanceTarget}>{a.target === 'wave' ? 'Wave' : 'Orange Money'}</Text>
+                <Text style={styles.advanceAmount}>{formatFCFA(a.amount)}</Text>
+              </View>
+              <View style={styles.advanceActions}>
+                <Button
+                  label="Modifier"
+                  variant="outline"
+                  onPress={() => navigation.navigate('AddAdvance', { advanceId: a.id })}
+                  style={styles.advanceActionBtn}
+                />
+                <Button
+                  label="Supprimer"
+                  variant="danger"
+                  onPress={() => onDeleteAdvance(a)}
+                  style={styles.advanceActionBtn}
+                />
+              </View>
             </View>
           ))}
         </Card>
@@ -121,7 +156,16 @@ const styles = StyleSheet.create({
   lineLabelBold: { fontWeight: '700' },
   lineValue: { color: colors.text, fontWeight: '600' },
   lineValueBold: { fontWeight: '800', fontSize: fontSize.md },
-  advanceRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
+  advanceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
   advanceTarget: { color: colors.text },
   advanceAmount: { color: colors.text, fontWeight: '600' },
+  advanceActions: { flexDirection: 'row', gap: spacing.xs },
+  advanceActionBtn: { minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.sm },
 });
