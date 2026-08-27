@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Pressable, Image, ScrollView, Dimensions } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { listProducts } from '../../db/products';
@@ -15,6 +15,8 @@ import { parseAmount, parseQuantity } from '../../utils/validation';
 import { showAlert } from '../../utils/alert';
 
 type Nav = NativeStackNavigationProp<SalesStackParamList, 'QuickSale'>;
+
+const CARD_HEIGHT = Math.round(Dimensions.get('window').height * 0.75);
 
 const METHODS: PaymentMethod[] = ['especes', 'wave', 'om'];
 const METHOD_COLORS: Record<PaymentMethod, string> = {
@@ -98,7 +100,7 @@ export default function QuickSaleScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.containerContent}>
       <Button
         label="Historique des ventes"
         variant="outline"
@@ -219,12 +221,13 @@ export default function QuickSaleScreen() {
           />
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
+  container: { flex: 1, backgroundColor: colors.background },
+  containerContent: { padding: spacing.md, paddingBottom: spacing.xl },
   sectionLabel: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.sm },
   empty: { color: colors.textMuted, padding: spacing.md },
   productList: { paddingBottom: spacing.md, gap: spacing.sm },
@@ -233,7 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     marginRight: spacing.sm,
     minWidth: 130,
-    height: 240,
+    height: CARD_HEIGHT,
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: colors.border,
