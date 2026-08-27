@@ -126,19 +126,23 @@ export default function QuickSaleScreen() {
               ]}
               disabled={outOfStock}
             >
-              {item.image_uri ? (
-                <Image source={{ uri: item.image_uri }} style={styles.productChipImage} resizeMode="cover" />
-              ) : (
-                <View style={styles.productChipImagePlaceholder}>
-                  <Text style={{ fontSize: 18 }}>📦</Text>
-                </View>
-              )}
-              <Text style={[styles.productChipName, isSelected && styles.productChipTextSelected]}>
-                {item.name}
-              </Text>
-              <Text style={[styles.productChipMeta, isSelected && styles.productChipTextSelected]}>
-                {outOfStock ? 'Rupture' : `${item.quantity} en stock`}
-              </Text>
+              <View style={styles.productChipImageWrap}>
+                {item.image_uri ? (
+                  <Image source={{ uri: item.image_uri }} style={styles.productChipImage} resizeMode="cover" />
+                ) : (
+                  <View style={styles.productChipImagePlaceholder}>
+                    <Text style={{ fontSize: 18 }}>📦</Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.productChipInfo}>
+                <Text style={[styles.productChipName, isSelected && styles.productChipTextSelected]}>
+                  {item.name}
+                </Text>
+                <Text style={[styles.productChipMeta, isSelected && styles.productChipTextSelected]}>
+                  {outOfStock ? 'Rupture' : `${item.quantity} en stock`}
+                </Text>
+              </View>
             </Pressable>
           );
         }}
@@ -227,23 +231,24 @@ const styles = StyleSheet.create({
   productChip: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
-    padding: spacing.md,
     marginRight: spacing.sm,
     minWidth: 130,
+    height: 210,
+    overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: colors.border,
   },
   productChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  productChipImage: { width: '100%', height: 60, borderRadius: radius.sm, marginBottom: spacing.xs },
+  productChipImageWrap: { flex: 1, width: '100%' },
+  productChipImage: { width: '100%', height: '100%' },
   productChipImagePlaceholder: {
+    flex: 1,
     width: '100%',
-    height: 60,
-    borderRadius: radius.sm,
-    marginBottom: spacing.xs,
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  productChipInfo: { flex: 1, padding: spacing.sm, justifyContent: 'center' },
   productChipDisabled: { opacity: 0.4 },
   productChipName: { fontWeight: '700', color: colors.text, fontSize: fontSize.md },
   productChipMeta: { color: colors.textMuted, marginTop: 4, fontSize: fontSize.sm },
