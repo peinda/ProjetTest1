@@ -9,6 +9,7 @@ import { colors, spacing, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
 import { formatDateFr } from '../../utils/date';
 import Card from '../../components/Card';
+import Button from '../../components/Button';
 
 type Nav = NativeStackNavigationProp<DebtsStackParamList, 'DebtsHistory'>;
 
@@ -24,6 +25,9 @@ export default function DebtsHistoryScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.backRow}>
+        <Button label="← Retour aux dettes" variant="outline" onPress={() => navigation.goBack()} />
+      </View>
       <FlatList
         data={debts}
         keyExtractor={(item) => String(item.id)}
@@ -46,6 +50,7 @@ export default function DebtsHistoryScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  backRow: { padding: spacing.md, paddingBottom: 0 },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing.xl },
   client: { fontWeight: '700', color: colors.text, fontSize: fontSize.md },
   meta: { color: colors.textMuted, marginTop: 4 },

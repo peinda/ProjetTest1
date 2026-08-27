@@ -55,6 +55,12 @@ export default function SalesHistoryScreen() {
 
   return (
     <View style={styles.container}>
+      <Button
+        label="← Retour à la vente"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <View style={styles.dateNav}>
         <Pressable onPress={() => shiftDate(-1)} style={styles.navBtn}>
           <Text style={styles.navLabel}>◀</Text>

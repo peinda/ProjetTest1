@@ -112,6 +112,12 @@ export default function DebtDetailScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Button
+        label="← Retour aux dettes"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <Card>
         <Text style={styles.client}>{debt.client_name}</Text>
         {!!debt.client_phone && <Text style={styles.meta}>{debt.client_phone}</Text>}

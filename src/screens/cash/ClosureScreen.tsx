@@ -87,6 +87,12 @@ export default function ClosureScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Button
+        label="← Retour à la caisse"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <Text style={styles.title}>Clôture du {formatDateFr(date)}</Text>
 
       <Card>

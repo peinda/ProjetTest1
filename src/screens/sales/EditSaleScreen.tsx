@@ -82,6 +82,12 @@ export default function EditSaleScreen() {
 
   return (
     <View style={styles.container}>
+      <Button
+        label="← Retour à l'historique"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <Text style={styles.productName}>{sale.product_name}</Text>
 
       <Field

@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { NotesStackParamList } from '../../navigation/types';
-import { listNotes, deleteNote } from '../../db/notes';
+import { listNotes, deleteNote, getFirstImageByNote } from '../../db/notes';
 import { Note } from '../../db/types';
 import { colors, spacing, fontSize } from '../../theme/theme';
 import { formatDateTimeFr } from '../../utils/date';
@@ -16,9 +16,11 @@ type Nav = NativeStackNavigationProp<NotesStackParamList, 'NotesList'>;
 export default function NotesListScreen() {
   const navigation = useNavigation<Nav>();
   const [notes, setNotes] = useState<Note[]>([]);
+  const [thumbnails, setThumbnails] = useState<Record<number, string>>({});
 
   const load = useCallback(async () => {
     setNotes(await listNotes());
+    setThumbnails(await getFirstImageByNote());
   }, []);
 
   useFocusEffect(
@@ -50,6 +52,9 @@ export default function NotesListScreen() {
         ListEmptyComponent={<Text style={styles.empty}>Aucune note. Ajoutez votre première note.</Text>}
         renderItem={({ item }) => (
           <Card>
+            {!!thumbnails[item.id] && (
+              <Image source={{ uri: thumbnails[item.id] }} style={styles.thumb} resizeMode="cover" />
+            )}
             <Text style={styles.title}>{item.title}</Text>
             {!!item.content && (
               <Text style={styles.content} numberOfLines={3}>
@@ -80,6 +85,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: { padding: spacing.md, paddingBottom: 100 },
   empty: { textAlign: 'center', marginTop: spacing.xl, color: colors.textMuted },
+  thumb: { width: '100%', height: 120, borderRadius: 8, marginBottom: spacing.sm },
   title: { fontSize: fontSize.md, fontWeight: '700', color: colors.text },
   content: { color: colors.text, marginTop: spacing.xs },
   date: { color: colors.textMuted, fontSize: fontSize.sm, marginTop: spacing.xs },

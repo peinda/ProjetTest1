@@ -91,3 +91,10 @@ export interface Note {
   created_at: string;
   updated_at: string;
 }
+
+export interface NoteImage {
+  id: number;
+  note_id: number;
+  image_uri: string;
+  created_at: string;
+}

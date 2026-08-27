@@ -78,6 +78,12 @@ export default function DebtFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Button
+        label="← Retour"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <Field
         label="Nom du client"
         value={clientName}

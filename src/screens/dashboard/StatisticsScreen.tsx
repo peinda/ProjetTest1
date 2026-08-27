@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getTopProductsBetween, getProfitBetween, ProductTotal } from '../../db/sales';
 import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
@@ -17,11 +17,13 @@ import {
   yearRange,
 } from '../../utils/date';
 import Card from '../../components/Card';
+import Button from '../../components/Button';
 
 type PeriodType = 'day' | 'month' | 'year';
 const PERIOD_LABELS: Record<PeriodType, string> = { day: 'Jour', month: 'Mois', year: 'Année' };
 
 export default function StatisticsScreen() {
+  const navigation = useNavigation();
   const [periodType, setPeriodType] = useState<PeriodType>('day');
   const [day, setDay] = useState(todayStr());
   const [yearMonth, setYearMonth] = useState(currentYearMonth());
@@ -68,6 +70,12 @@ export default function StatisticsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Button
+        label="← Retour au résumé"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <View style={styles.periodRow}>
         {(['day', 'month', 'year'] as PeriodType[]).map((p) => (
           <Pressable

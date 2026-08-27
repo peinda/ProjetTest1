@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { useFocusEffect, useRoute, RouteProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StockStackParamList } from '../../navigation/types';
 import { listStockEntries, updateStockEntry, deleteStockEntry, getProduct } from '../../db/products';
 import { StockEntry } from '../../db/types';
@@ -15,6 +15,7 @@ import { showAlert } from '../../utils/alert';
 type R = RouteProp<StockStackParamList, 'StockHistory'>;
 
 export default function StockHistoryScreen() {
+  const navigation = useNavigation();
   const route = useRoute<R>();
   const productId = route.params?.productId;
 
@@ -85,6 +86,13 @@ export default function StockHistoryScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={{ padding: spacing.md, paddingBottom: 0 }}>
+        <Button
+          label="← Retour au produit"
+          variant="outline"
+          onPress={() => navigation.goBack()}
+        />
+      </View>
       {!!productName && <Text style={styles.productName}>{productName}</Text>}
       <FlatList
         data={entries}

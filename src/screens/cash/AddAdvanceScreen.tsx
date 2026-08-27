@@ -60,6 +60,12 @@ export default function AddAdvanceScreen() {
 
   return (
     <View style={styles.container}>
+      <Button
+        label="← Retour à la caisse"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <Text style={styles.label}>Compte crédité</Text>
       <View style={styles.targetRow}>
         {(['wave', 'om'] as AdvanceTarget[]).map((t) => (

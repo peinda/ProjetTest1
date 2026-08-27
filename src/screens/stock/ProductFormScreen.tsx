@@ -9,7 +9,7 @@ import Field from '../../components/Field';
 import Button from '../../components/Button';
 import { parseAmount, parseQuantity, isNonEmpty, MAX_LENGTHS } from '../../utils/validation';
 import { showAlert } from '../../utils/alert';
-import { pickProductImage } from '../../utils/imagePicker';
+import { pickImage } from '../../utils/imagePicker';
 
 type Nav = NativeStackNavigationProp<StockStackParamList, 'ProductForm'>;
 type R = RouteProp<StockStackParamList, 'ProductForm'>;
@@ -108,7 +108,7 @@ export default function ProductFormScreen() {
   };
 
   const onPickImage = async () => {
-    const uri = await pickProductImage();
+    const uri = await pickImage();
     if (uri) setImageUri(uri);
   };
 

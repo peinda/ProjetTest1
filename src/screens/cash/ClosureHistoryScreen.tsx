@@ -48,6 +48,9 @@ export default function ClosureHistoryScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.backRow}>
+        <Button label="← Retour à la caisse" variant="outline" onPress={() => navigation.goBack()} />
+      </View>
       <FlatList
         data={closures}
         keyExtractor={(item) => String(item.id)}
@@ -87,6 +90,7 @@ export default function ClosureHistoryScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  backRow: { padding: spacing.md, paddingBottom: 0 },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing.xl },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs },
   date: { fontWeight: '800', fontSize: fontSize.md, color: colors.text },

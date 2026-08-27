@@ -1,14 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getAdvanceTotalsBetween, getAllTimeAdvanceTotals, AdvanceTotals } from '../../db/cash';
 import { getTotalsBetween, PaymentTotals } from '../../db/sales';
 import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
 import { currentYearMonth, shiftYearMonth, monthRange, formatMonthFr } from '../../utils/date';
 import Card from '../../components/Card';
+import Button from '../../components/Button';
 
 export default function MonthlyBalanceScreen() {
+  const navigation = useNavigation();
   const [yearMonth, setYearMonth] = useState(currentYearMonth());
   const [advances, setAdvances] = useState<AdvanceTotals>({ wave: 0, om: 0 });
   const [sales, setSales] = useState<PaymentTotals>({ especes: 0, wave: 0, om: 0 });
@@ -33,6 +35,12 @@ export default function MonthlyBalanceScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Button
+        label="← Retour à la caisse"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
       <View style={styles.monthNav}>
         <Pressable onPress={() => setYearMonth(shiftYearMonth(yearMonth, -1))} style={styles.navBtn}>
           <Text style={styles.navLabel}>◀</Text>

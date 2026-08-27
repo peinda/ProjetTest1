@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
  * and stays valid across app/browser restarts (unlike blob:/file: URIs).
  * Returns null if the user cancels or permission is denied.
  */
-export async function pickProductImage(): Promise<string | null> {
+export async function pickImage(): Promise<string | null> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) return null;
 
