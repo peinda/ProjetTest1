@@ -16,7 +16,8 @@ import { showAlert } from '../../utils/alert';
 
 type Nav = NativeStackNavigationProp<SalesStackParamList, 'QuickSale'>;
 
-const CARD_HEIGHT = Math.round(Dimensions.get('window').height * 0.75);
+const CARD_WIDTH = 160;
+const CARD_HEIGHT = Math.max(180, Math.min(420, Dimensions.get('window').height - 280));
 
 const METHODS: PaymentMethod[] = ['especes', 'wave', 'om'];
 const METHOD_COLORS: Record<PaymentMethod, string> = {
@@ -138,7 +139,10 @@ export default function QuickSaleScreen() {
                 )}
               </View>
               <View style={styles.productChipInfo}>
-                <Text style={[styles.productChipName, isSelected && styles.productChipTextSelected]}>
+                <Text
+                  style={[styles.productChipName, isSelected && styles.productChipTextSelected]}
+                  numberOfLines={2}
+                >
                   {item.name}
                 </Text>
                 <Text style={[styles.productChipMeta, isSelected && styles.productChipTextSelected]}>
@@ -235,7 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     marginRight: spacing.sm,
-    minWidth: 130,
+    width: CARD_WIDTH,
     height: CARD_HEIGHT,
     overflow: 'hidden',
     borderWidth: 1.5,
