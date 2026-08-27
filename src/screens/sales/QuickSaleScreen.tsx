@@ -146,6 +146,12 @@ export default function QuickSaleScreen() {
 
       {selected && (
         <View style={styles.form}>
+          <Button
+            label="← Retour au choix du produit"
+            variant="outline"
+            onPress={reset}
+            style={{ marginBottom: spacing.md }}
+          />
           <Text style={styles.sectionLabel}>2. Quantité et prix</Text>
           <View style={styles.row}>
             <View style={styles.stepper}>

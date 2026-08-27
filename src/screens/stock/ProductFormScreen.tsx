@@ -129,6 +129,13 @@ export default function ProductFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: spacing.md }}>
+      <Button
+        label="← Retour aux produits"
+        variant="outline"
+        onPress={() => navigation.goBack()}
+        style={{ marginBottom: spacing.md }}
+      />
+
       <Text style={styles.label}>Photo du produit</Text>
       <View style={styles.photoRow}>
         <Pressable onPress={onPickImage} style={styles.photoPreview}>

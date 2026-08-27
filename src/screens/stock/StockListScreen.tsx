@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StockStackParamList } from '../../navigation/types';
-import { listProducts, deleteProduct } from '../../db/products';
+import { listProducts, deleteProduct, getStockSummaryByProduct, StockSummary } from '../../db/products';
 import { Product } from '../../db/types';
 import { colors, spacing, radius, fontSize } from '../../theme/theme';
 import { formatFCFA } from '../../utils/format';
@@ -16,9 +16,11 @@ type Nav = NativeStackNavigationProp<StockStackParamList, 'StockList'>;
 export default function StockListScreen() {
   const navigation = useNavigation<Nav>();
   const [products, setProducts] = useState<Product[]>([]);
+  const [summary, setSummary] = useState<Record<number, StockSummary>>({});
 
   const load = useCallback(async () => {
     setProducts(await listProducts());
+    setSummary(await getStockSummaryByProduct());
   }, []);
 
   useFocusEffect(
@@ -63,6 +65,7 @@ export default function StockListScreen() {
         }
         renderItem={({ item }) => {
           const low = item.quantity <= item.low_stock_threshold;
+          const s = summary[item.id] ?? { initial: 0, sold: 0 };
           return (
             <Card style={low ? styles.lowCard : undefined}>
               <View style={styles.row}>
@@ -83,6 +86,11 @@ export default function StockListScreen() {
                   <Text style={styles.qtyLabel}>en stock</Text>
                 </View>
               </View>
+              <View style={styles.statsRow}>
+                <StatItem label="Stock initial" value={s.initial} />
+                <StatItem label="Vendu" value={s.sold} />
+                <StatItem label="Restant" value={item.quantity} highlight={low} />
+              </View>
               <View style={styles.productActions}>
                 <Button
                   label="Modifier"
@@ -99,6 +107,15 @@ export default function StockListScreen() {
       <View style={styles.footer}>
         <Button label="+ Ajouter un produit" onPress={() => navigation.navigate('ProductForm')} />
       </View>
+    </View>
+  );
+}
+
+function StatItem({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+  return (
+    <View style={styles.statItem}>
+      <Text style={[styles.statValue, highlight && styles.statValueLow]}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
@@ -136,6 +153,17 @@ const styles = StyleSheet.create({
   qtyLow: { color: colors.danger },
   qtyLabel: { fontSize: 11, color: colors.textMuted },
   lowCard: { borderWidth: 1, borderColor: colors.danger },
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  statItem: { flex: 1, alignItems: 'center' },
+  statValue: { fontSize: fontSize.md, fontWeight: '800', color: colors.text },
+  statValueLow: { color: colors.danger },
+  statLabel: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   productActions: {
     flexDirection: 'row',
     gap: spacing.xs,

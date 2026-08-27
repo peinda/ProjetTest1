@@ -96,6 +96,14 @@ export async function initDatabase(): Promise<void> {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    CREATE TABLE IF NOT EXISTS notes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      content TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_sales_date ON sales(sale_date);
     CREATE INDEX IF NOT EXISTS idx_advances_date ON cash_advances(advance_date);
     CREATE INDEX IF NOT EXISTS idx_debts_status ON debts(status);

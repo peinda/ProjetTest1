@@ -29,3 +29,8 @@ export type DashboardStackParamList = {
   Dashboard: undefined;
   Statistics: undefined;
 };
+
+export type NotesStackParamList = {
+  NotesList: undefined;
+  NoteForm: { noteId?: number } | undefined;
+};

@@ -121,6 +121,28 @@ export async function deleteStockEntry(entryId: number): Promise<void> {
   });
 }
 
+export interface StockSummary {
+  initial: number;
+  sold: number;
+}
+
+export async function getStockSummaryByProduct(): Promise<Record<number, StockSummary>> {
+  const db = await getDb();
+  const entries = await db.getAllAsync<{ product_id: number; total: number }>(
+    'SELECT product_id, SUM(quantity) as total FROM stock_entries GROUP BY product_id'
+  );
+  const sales = await db.getAllAsync<{ product_id: number; total: number }>(
+    'SELECT product_id, SUM(quantity) as total FROM sales WHERE product_id IS NOT NULL GROUP BY product_id'
+  );
+  const result: Record<number, StockSummary> = {};
+  for (const e of entries) result[e.product_id] = { initial: e.total, sold: 0 };
+  for (const s of sales) {
+    if (!result[s.product_id]) result[s.product_id] = { initial: 0, sold: 0 };
+    result[s.product_id].sold = s.total;
+  }
+  return result;
+}
+
 export async function decrementStock(productId: number, quantity: number): Promise<void> {
   const db = await getDb();
   await db.runAsync(

@@ -10,6 +10,7 @@ import {
   CashStackParamList,
   DebtsStackParamList,
   DashboardStackParamList,
+  NotesStackParamList,
 } from './types';
 import { colors } from '../theme/theme';
 
@@ -35,12 +36,16 @@ import DebtsHistoryScreen from '../screens/debts/DebtsHistoryScreen';
 import DashboardScreen from '../screens/dashboard/DashboardScreen';
 import StatisticsScreen from '../screens/dashboard/StatisticsScreen';
 
+import NotesListScreen from '../screens/notes/NotesListScreen';
+import NoteFormScreen from '../screens/notes/NoteFormScreen';
+
 const Tab = createBottomTabNavigator();
 const StockStack = createNativeStackNavigator<StockStackParamList>();
 const SalesStack = createNativeStackNavigator<SalesStackParamList>();
 const CashStack = createNativeStackNavigator<CashStackParamList>();
 const DebtsStack = createNativeStackNavigator<DebtsStackParamList>();
 const DashboardStack = createNativeStackNavigator<DashboardStackParamList>();
+const NotesStack = createNativeStackNavigator<NotesStackParamList>();
 
 const screenOptions = {
   headerStyle: { backgroundColor: colors.primary },
@@ -100,6 +105,15 @@ function DashboardNavigator() {
   );
 }
 
+function NotesNavigator() {
+  return (
+    <NotesStack.Navigator screenOptions={screenOptions}>
+      <NotesStack.Screen name="NotesList" component={NotesListScreen} options={{ title: 'Notes' }} />
+      <NotesStack.Screen name="NoteForm" component={NoteFormScreen} options={{ title: 'Note' }} />
+    </NotesStack.Navigator>
+  );
+}
+
 function TabIcon({ symbol }: { symbol: string }) {
   return <Text style={{ fontSize: 20 }}>{symbol}</Text>;
 }
@@ -141,6 +155,11 @@ export default function RootNavigator() {
             tabBarIcon: () => <TabIcon symbol="📊" />,
             tabBarLabel: 'Résumé',
           }}
+        />
+        <Tab.Screen
+          name="Notes"
+          component={NotesNavigator}
+          options={{ tabBarIcon: () => <TabIcon symbol="📝" /> }}
         />
       </Tab.Navigator>
     </NavigationContainer>
