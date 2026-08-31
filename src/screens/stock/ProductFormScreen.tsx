@@ -24,6 +24,7 @@ export default function ProductFormScreen() {
   const [category, setCategory] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
+  const [wholesalePrice, setWholesalePrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [threshold, setThreshold] = useState('3');
   const [restockAmount, setRestockAmount] = useState('');
@@ -38,6 +39,7 @@ export default function ProductFormScreen() {
         setCategory(p.category ?? '');
         setPurchasePrice(String(p.purchase_price));
         setSalePrice(String(p.sale_price));
+        setWholesalePrice(String(p.wholesale_price));
         setQuantity(String(p.quantity));
         setThreshold(String(p.low_stock_threshold));
         setImageUri(p.image_uri);
@@ -58,7 +60,12 @@ export default function ProductFormScreen() {
     }
     const sale = parseAmount(salePrice || '0', { allowZero: true });
     if (sale === null) {
-      showAlert('Prix de vente invalide', 'Saisissez un montant valide (0 ou plus).');
+      showAlert('Prix détail invalide', 'Saisissez un montant valide (0 ou plus).');
+      return;
+    }
+    const wholesale = parseAmount(wholesalePrice || '0', { allowZero: true });
+    if (wholesale === null) {
+      showAlert('Prix en gros invalide', 'Saisissez un montant valide (0 ou plus).');
       return;
     }
     const qty = isEdit ? 0 : parseQuantity(quantity || '0', { allowZero: true });
@@ -78,6 +85,7 @@ export default function ProductFormScreen() {
         category: category.trim() || null,
         purchase_price: purchase,
         sale_price: sale,
+        wholesale_price: wholesale,
         quantity: qty,
         low_stock_threshold: threshNum,
         image_uri: imageUri,
@@ -179,9 +187,16 @@ export default function ProductFormScreen() {
         placeholder="0"
       />
       <Field
-        label="Prix de vente (FCFA)"
+        label="Prix détail (FCFA)"
         value={salePrice}
         onChangeText={setSalePrice}
+        keyboardType="numeric"
+        placeholder="0"
+      />
+      <Field
+        label="Prix en gros (FCFA)"
+        value={wholesalePrice}
+        onChangeText={setWholesalePrice}
         keyboardType="numeric"
         placeholder="0"
       />

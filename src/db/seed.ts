@@ -16,14 +16,14 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
   const existing = await listProducts();
   if (existing.length > 0) return;
 
-  const robe = await createProduct({ name: 'Robe wax imprimée', category: 'Robes', purchase_price: 6000, sale_price: 10000, quantity: 10, low_stock_threshold: 3 });
-  const ensPantalon = await createProduct({ name: 'Ensemble pantalon tailleur', category: 'Ensembles_pantalon', purchase_price: 9000, sale_price: 15000, quantity: 5, low_stock_threshold: 2 });
-  const ensJupe = await createProduct({ name: 'Ensemble jupe chemisier', category: 'Ensembles_jupe', purchase_price: 8000, sale_price: 13000, quantity: 4, low_stock_threshold: 3 });
-  const ensPagne = await createProduct({ name: 'Ensemble pagne bazin', category: 'Ensembles_pagne', purchase_price: 10000, sale_price: 16000, quantity: 3, low_stock_threshold: 3 });
-  const jupe = await createProduct({ name: 'Jupe crayon', category: 'Jupes', purchase_price: 4000, sale_price: 7000, quantity: 8, low_stock_threshold: 3 });
-  const robeCole = await createProduct({ name: 'Robe Cole soirée', category: 'Robe_Cole', purchase_price: 12000, sale_price: 20000, quantity: 2, low_stock_threshold: 3 });
-  const robeEnfant = await createProduct({ name: 'Robe fillette wax', category: 'robes_Enfant', purchase_price: 3000, sale_price: 5500, quantity: 6, low_stock_threshold: 3 });
-  const divers = await createProduct({ name: 'Foulard', category: 'Divers', purchase_price: 1500, sale_price: 3000, quantity: 15, low_stock_threshold: 5 });
+  const robe = await createProduct({ name: 'Robe wax imprimée', category: 'Robes', purchase_price: 6000, sale_price: 10000, wholesale_price: 8500, quantity: 10, low_stock_threshold: 3 });
+  const ensPantalon = await createProduct({ name: 'Ensemble pantalon tailleur', category: 'Ensembles_pantalon', purchase_price: 9000, sale_price: 15000, wholesale_price: 12500, quantity: 5, low_stock_threshold: 2 });
+  const ensJupe = await createProduct({ name: 'Ensemble jupe chemisier', category: 'Ensembles_jupe', purchase_price: 8000, sale_price: 13000, wholesale_price: 11000, quantity: 4, low_stock_threshold: 3 });
+  const ensPagne = await createProduct({ name: 'Ensemble pagne bazin', category: 'Ensembles_pagne', purchase_price: 10000, sale_price: 16000, wholesale_price: 13500, quantity: 3, low_stock_threshold: 3 });
+  const jupe = await createProduct({ name: 'Jupe crayon', category: 'Jupes', purchase_price: 4000, sale_price: 7000, wholesale_price: 6000, quantity: 8, low_stock_threshold: 3 });
+  const robeCole = await createProduct({ name: 'Robe Cole soirée', category: 'Robe_Cole', purchase_price: 12000, sale_price: 20000, wholesale_price: 17000, quantity: 2, low_stock_threshold: 3 });
+  const robeEnfant = await createProduct({ name: 'Robe fillette wax', category: 'robes_Enfant', purchase_price: 3000, sale_price: 5500, wholesale_price: 4700, quantity: 6, low_stock_threshold: 3 });
+  const divers = await createProduct({ name: 'Foulard', category: 'Divers', purchase_price: 1500, sale_price: 3000, wholesale_price: 2400, quantity: 15, low_stock_threshold: 5 });
 
   const today = todayStr();
   const yesterday = daysAgoStr(1);

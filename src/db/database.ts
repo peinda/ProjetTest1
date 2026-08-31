@@ -20,6 +20,7 @@ export async function initDatabase(): Promise<void> {
       category TEXT,
       purchase_price REAL NOT NULL DEFAULT 0,
       sale_price REAL NOT NULL DEFAULT 0,
+      wholesale_price REAL NOT NULL DEFAULT 0,
       quantity INTEGER NOT NULL DEFAULT 0,
       low_stock_threshold INTEGER NOT NULL DEFAULT 3,
       image_uri TEXT,
@@ -120,6 +121,9 @@ export async function initDatabase(): Promise<void> {
   const columns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(products)');
   if (!columns.some((c) => c.name === 'image_uri')) {
     await db.execAsync('ALTER TABLE products ADD COLUMN image_uri TEXT;');
+  }
+  if (!columns.some((c) => c.name === 'wholesale_price')) {
+    await db.execAsync('ALTER TABLE products ADD COLUMN wholesale_price REAL NOT NULL DEFAULT 0;');
   }
 
   // Migration for databases created before the purchase_price column existed

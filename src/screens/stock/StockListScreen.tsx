@@ -79,7 +79,9 @@ export default function StockListScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.name}>{item.name}</Text>
                   {!!item.category && <Text style={styles.category}>{item.category}</Text>}
-                  <Text style={styles.price}>{formatFCFA(item.sale_price)}</Text>
+                  <Text style={styles.price}>
+                    Détail : {formatFCFA(item.sale_price)} · Gros : {formatFCFA(item.wholesale_price)}
+                  </Text>
                 </View>
                 <View style={styles.qtyBox}>
                   <Text style={[styles.qty, low && styles.qtyLow]}>{item.quantity}</Text>

@@ -26,11 +26,15 @@ const METHOD_COLORS: Record<PaymentMethod, string> = {
   om: colors.om,
 };
 
+type PriceType = 'detail' | 'gros';
+const PRICE_TYPE_LABELS: Record<PriceType, string> = { detail: 'Détail', gros: 'En gros' };
+
 export default function QuickSaleScreen() {
   const navigation = useNavigation<Nav>();
   const [products, setProducts] = useState<Product[]>([]);
   const [selected, setSelected] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState('1');
+  const [priceType, setPriceType] = useState<PriceType>('detail');
   const [unitPrice, setUnitPrice] = useState('');
   const [payment, setPayment] = useState<PaymentMethod | null>(null);
   const [saving, setSaving] = useState(false);
@@ -43,8 +47,15 @@ export default function QuickSaleScreen() {
 
   const selectProduct = (p: Product) => {
     setSelected(p);
+    setPriceType('detail');
     setUnitPrice(String(p.sale_price));
     setQuantity('1');
+  };
+
+  const selectPriceType = (type: PriceType) => {
+    if (!selected) return;
+    setPriceType(type);
+    setUnitPrice(String(type === 'detail' ? selected.sale_price : selected.wholesale_price));
   };
 
   const validQty = parseQuantity(quantity);
@@ -62,6 +73,7 @@ export default function QuickSaleScreen() {
   const reset = () => {
     setSelected(null);
     setQuantity('1');
+    setPriceType('detail');
     setUnitPrice('');
     setPayment(null);
   };
@@ -163,6 +175,19 @@ export default function QuickSaleScreen() {
             style={{ marginBottom: spacing.md }}
           />
           <Text style={styles.sectionLabel}>2. Quantité et prix</Text>
+          <View style={styles.priceTypeRow}>
+            {(['detail', 'gros'] as PriceType[]).map((t) => (
+              <Pressable
+                key={t}
+                onPress={() => selectPriceType(t)}
+                style={[styles.priceTypeBtn, priceType === t && styles.priceTypeBtnActive]}
+              >
+                <Text style={[styles.priceTypeLabel, priceType === t && styles.priceTypeLabelActive]}>
+                  {PRICE_TYPE_LABELS[t]}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
           <View style={styles.row}>
             <View style={styles.stepper}>
               <Pressable
@@ -261,6 +286,18 @@ const styles = StyleSheet.create({
   productChipMeta: { color: colors.textMuted, marginTop: 4, fontSize: fontSize.sm },
   productChipTextSelected: { color: '#FFFFFF' },
   form: { marginTop: spacing.md },
+  priceTypeRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+  priceTypeBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: 'center',
+  },
+  priceTypeBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+  priceTypeLabel: { fontWeight: '700', color: colors.text },
+  priceTypeLabelActive: { color: '#FFFFFF' },
   row: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   stepperBtn: {

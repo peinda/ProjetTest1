@@ -8,6 +8,7 @@ export interface Product {
   category: string | null;
   purchase_price: number;
   sale_price: number;
+  wholesale_price: number;
   quantity: number;
   low_stock_threshold: number;
   image_uri: string | null;
